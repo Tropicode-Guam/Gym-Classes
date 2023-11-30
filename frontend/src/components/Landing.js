@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = process.env.REACT_APP_API
+
 const Landing = () => {
     const [classes, setClasses] = useState([]);
     const [error, setError] = useState(null);
@@ -7,7 +9,7 @@ const Landing = () => {
     const fetchClasses = async () => {
         try {
             // If your server runs on port 5000
-            const response = await fetch('http://localhost:5000/classes');
+            const response = await fetch(`${API_BASE}/classes`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

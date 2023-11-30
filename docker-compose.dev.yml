@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: gym_classes_frontend
+    build:
+      context: frontend
+      dockerfile: Dockerfile.dev
+      args:
+        - HOST=localhost
+        - API_BASE=/api
+    restart: always
+    environment:
+      - VIRTUAL_HOST=localhost
+      - VIRTUAL_PORT=3000
+      - VIRTUAL_PATH=/
+      - NODE_ENV=development
+    volumes:
+      - ./frontend/src:/usr/src/app/src:ro
+      - ./frontend/public:/usr/src/app/public:ro
+    networks:
+      - proxy-network  
+
+  backend:
+    container_name: gym_classes_api
+    build:
+      context: backend
+    restart: always
+    environment:
+      - VIRTUAL_HOST=localhost
+      - VIRTUAL_PORT=5000
+      - VIRTUAL_PATH=/api
+      - API_BASE=/api
+      - NODE_ENV=localhost
+      - DB_URL=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/${DB_NAME:-development}
+    volumes:
+      - ./backend/models:/usr/src/app/models:ro
+      - ./backend/server.js:/usr/src/app/server.js:ro
+    networks:
+      - db
+      - proxy-network
+    command: npm run start
+
+  db:
+    container_name: gym_classes_db
+    image: mongo:7.0.3
+    restart: always
+    volumes:
+      - ./db/init.d/:/docker-entrypoint-initdb.d/:ro
+      - ./db/data/devdb/:/data/db/
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$DB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+      - MONGO_INITDB_DATABASE=${DB_NAME:-development}
+      - MONGO_INITDB_USER=$DB_USER
+      - MONGO_INITDB_PASSWORD=$DB_PASSWORD
+      - ADMIN_USER=$ADMIN_USER
+      - ADMIN_PASSWORD=$ADMIN_PASSWORD
+    networks:
+      - db
+    
+  nginx:
+    image: nginxproxy/nginx-proxy:latest
+    restart: always
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "${XDG_RUNTIME_DIR:-/var/run}/docker.sock:/tmp/docker.sock:ro"
+      - vhost:/etc/nginx/vhost.d
+      - certs:/etc/nginx/certs
+      - share:/usr/share/nginx/html
+    networks:
+      - proxy-network
+
+volumes:
+  vhost:
+  share:
+  certs:
+
+networks:
+  db:
+  proxy-network:

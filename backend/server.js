@@ -2,6 +2,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const router = express.Router()
+
+const API_BASE = process.env['API_BASE']
 
 // Import your models
 const Class = require('./models/Class'); // Ensure you have created the Class model
@@ -10,7 +13,7 @@ const Class = require('./models/Class'); // Ensure you have created the Class mo
 require('dotenv').config();
 
 // Retrieve DB_URL from environment variables
-const DB_URL = process.env.DB_URL;
+const DB_URL = process.env.DB_URL
 if (!DB_URL) {
   console.error('DB_URL is not defined in your environment variables');
   process.exit(1); // Exit the process if DB_URL is not defined
@@ -37,12 +40,12 @@ app.use(express.json());
 app.use(cors());
 
 // Define the GET endpoint for / route
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 // Define the GET endpoint for fetching classes
-app.get('/classes', async (req, res) => {
+router.get('/classes', async (req, res) => {
   try {
     const classes = await Class.find({});
     res.json(classes);
@@ -52,7 +55,7 @@ app.get('/classes', async (req, res) => {
 });
 
 // Define the POST endpoint for creating a new class
-app.post('/classes', async (req, res) => {
+router.post('/classes', async (req, res) => {
   try {
     const newClass = new Class(req.body);
     const savedClass = await newClass.save();
@@ -67,6 +70,9 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
+
+// hook up router
+app.use(API_BASE, router)
 
 // Start the server
 const PORT = process.env.PORT || 5000;
