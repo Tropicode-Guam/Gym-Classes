@@ -72,7 +72,7 @@ router.post('/login', async (req, res) => {
 // Define the POST endpoint for creating a new class
 router.post('/classes', async (req, res) => {
   if (!auth.authenticate(req.body.key)) {
-    res.status(401).json("forbidden")
+    return res.status(401).json("forbidden")
   }
   try {
     const newClass = new Class(req.body);
