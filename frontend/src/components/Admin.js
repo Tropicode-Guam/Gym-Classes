@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const API_BASE = process.env.REACT_APP_API
 
-function LockScreen() {
+function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -65,4 +65,4 @@ function LockScreen() {
     );
 }
 
-export default LockScreen;
+export default Admin;
