@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: gym_classes_frontend
+    build:
+      context: frontend
+      args:
+        - HOST=${HOST}
+        - API_BASE=/api
+    restart: always
+    environment:
+      - VIRTUAL_HOST=${HOST}
+      - VIRTUAL_PORT=3000
+      - VIRTUAL_PATH=/
+      - NODE_ENV=${ENV:-production}
+    networks:
+      - proxy-network  
+
+  backend:
+    container_name: gym_classes_api
+    build:
+      context: backend
+    restart: always
+    environment:
+      - VIRTUAL_HOST=${HOST}
+      - VIRTUAL_PORT=5000
+      - VIRTUAL_PATH=/api
+      - API_BASE=/api
+      - NODE_ENV=${ENV:-production}
+      - DB_URL=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/${DB_NAME:-production}
+    networks:
+      - db
+      - proxy-network
+
+  db:
+    container_name: gym_classes_db
+    image: mongo:7.0.3
+    restart: always
+    volumes:
+      - ./db/init.d/:/docker-entrypoint-initdb.d/:ro
+      - ./db/data/db/:/data/db/
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$DB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+      - MONGO_INITDB_DATABASE=${DB_NAME:-production}
+      - MONGO_INITDB_USER=$DB_USER
+      - MONGO_INITDB_PASSWORD=$DB_PASSWORD
+      - ADMIN_USER=$ADMIN_USER
+      - ADMIN_PASSWORD=$ADMIN_PASSWORD
+    networks:
+      - db
+    
+  nginx:
+    image: nginxproxy/nginx-proxy:latest
+    restart: always
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "${XDG_RUNTIME_DIR:-/var/run}/docker.sock:/tmp/docker.sock:ro"
+      - vhost:/etc/nginx/vhost.d
+      - certs:/etc/nginx/certs
+      - share:/usr/share/nginx/html
+    networks:
+      - proxy-network
+  
+  certbot:
+    image: nginxproxy/acme-companion:latest
+    restart: always
+    container_name: certbot
+    volumes_from:
+      - nginx
+    volumes:
+      - "${XDG_RUNTIME_DIR:-/var/run}/docker.sock:/var/run/docker.sock:ro"
+      - acme:/etc/acme.sh
+    networks:
+      - proxy-network
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}
+
+volumes:
+  vhost:
+  share:
+  certs:
+  acme:
+
+networks:
+  db:
+  proxy-network:
