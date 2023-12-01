@@ -27,8 +27,11 @@ services:
     restart: always
     environment:
       - API_BASE=/api
-      - NODE_ENV=localhost
-      - DB_URL=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/${DB_NAME:-development}
+      - NODE_ENV=development
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_HOST=db:27017
+      - DB_NAME=${DB_NAME:-development}
     ports:
       - 5000:5000
     volumes:

@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const router = express.Router()
+const auth = require('./utils/auth')
 
 const API_BASE = process.env['API_BASE']
 
@@ -13,7 +14,11 @@ const Class = require('./models/Class'); // Ensure you have created the Class mo
 require('dotenv').config();
 
 // Retrieve DB_URL from environment variables
-const DB_URL = process.env.DB_URL
+function generate_db_url(username, password) {
+  return `mongodb://${username}:${password}@${process.env.DB_HOST}/${process.env.DB_NAME}`
+}
+const DB_URL = generate_db_url(process.env.DB_USER, process.env.DB_PASSWORD)
+
 if (!DB_URL) {
   console.error('DB_URL is not defined in your environment variables');
   process.exit(1); // Exit the process if DB_URL is not defined
@@ -54,8 +59,21 @@ router.get('/classes', async (req, res) => {
   }
 });
 
+router.post('/login', async (req, res) => {
+  try {
+    await mongoose.createConnection(generate_db_url(req.body.username, req.body.password)).asPromise()
+    const hash = await auth.hash(req.body.username, req.body.password, 1)
+    res.status(200).json(hash)
+  } catch (error) {
+    res.status(401).json(false)
+  }
+})
+
 // Define the POST endpoint for creating a new class
 router.post('/classes', async (req, res) => {
+  if (!auth.authenticate(req.body.key)) {
+    res.status(401).json("forbidden")
+  }
   try {
     const newClass = new Class(req.body);
     const savedClass = await newClass.save();

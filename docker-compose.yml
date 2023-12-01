@@ -28,7 +28,10 @@ services:
       - VIRTUAL_PATH=/api
       - API_BASE=/api
       - NODE_ENV=${ENV:-production}
-      - DB_URL=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/${DB_NAME:-production}
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_HOST=db:27017
+      - DB_NAME=${DB_NAME:-production}
     networks:
       - db
       - proxy-network
