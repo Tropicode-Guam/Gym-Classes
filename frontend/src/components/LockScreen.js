@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API_BASE = process.env.REACT_APP_API
+
 function LockScreen() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -12,7 +14,7 @@ function LockScreen() {
 
         try {
             // Send a POST request to the /login endpoint
-            const response = await fetch('/login', {
+            const response = await fetch(`${API_BASE}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
