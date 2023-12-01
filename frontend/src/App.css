@@ -1,38 +1,53 @@
 .App {
-  text-align: center;
-}
+	text-align: center;
+	background: linear-gradient(
+		117deg,
+		rgba(0, 129, 125, 1) 0%,
+		rgba(52, 198, 194, 1) 32%,
+		rgba(30, 218, 218, 1) 48%,
+		rgba(0, 212, 255, 1) 100%
+	);
+	background-size: cover;
+	background-attachment: fixed;
+
+	/* Make the app fill the entire viewport */
+	width: 100vw; /* viewport width */
+	height: 100vh; /* viewport height */
+	margin: 0; /* Remove default margin */
+	overflow: auto; /* Adds scroll to the app if the content overflows */
+} 
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+	height: 40vmin;
+	pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+	.App-logo {
+		animation: App-logo-spin infinite 20s linear;
+	}
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+	background-color: #282c34;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	font-size: calc(10px + 2vmin);
+	color: white;
 }
 
 .App-link {
-  color: #61dafb;
+	color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }

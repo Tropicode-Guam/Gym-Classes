@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+import './Landing.css';
 const API_BASE = process.env.REACT_APP_API
 
 const Landing = () => {
@@ -27,8 +28,8 @@ const Landing = () => {
     }, []);
 
     return (
-        <div>
-            <h1>Upcoming Classes</h1>
+        <div className='Classes'>
+            <h1>Classes</h1>
             {error && <p>Error fetching classes: {error}</p>}
             <ul>
                 {classes.map((classItem) => (
