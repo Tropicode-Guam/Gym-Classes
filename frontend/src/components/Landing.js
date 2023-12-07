@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import './Landing.css';
-const API_BASE = process.env.REACT_APP_API
 
 const Landing = () => {
     const [classes, setClasses] = useState([]);
@@ -9,8 +8,9 @@ const Landing = () => {
 
     const fetchClasses = async () => {
         try {
-            // If your server runs on port 5000
-            const response = await fetch(`${API_BASE}/classes`);
+            // Specify the full URL with port number
+            const url = 'http://localhost:5000/api/classes';
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -20,6 +20,7 @@ const Landing = () => {
             setError(`Error fetching classes: ${error.message}`);
         }
     };
+    
     
 
     // Use useEffect to fetch classes when the component mounts
