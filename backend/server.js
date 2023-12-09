@@ -69,19 +69,47 @@ router.post('/login', async (req, res) => {
   }
 })
 
-// Define the POST endpoint for creating a new class
-router.post('/classes', async (req, res) => {
+const multer = require('multer');
+const upload = multer({
+  limits: {
+    fileSize: 1000000 // Limit the file size (e.g., 1MB)
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error('Please upload an image (jpg, jpeg, png).'));
+    }
+    cb(undefined, true);
+  }
+});
+
+router.post('/classes', upload.single('image'), async (req, res) => {
   if (!auth.authenticate(req.body.key)) {
-    return res.status(401).json("forbidden")
+    return res.status(401).json("forbidden");
   }
   try {
-    const newClass = new Class(req.body);
+    const newClass = new Class({
+      ...req.body,
+      image: req.file.buffer // Storing the image buffer in the Class model
+    });
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    // Handle multer-specific errors here
+    return res.status(400).send(err.message);
+  }
+  if (err) {
+    console.error(err.stack);
+    return res.status(500).send('Something broke!');
+  }
+  next();
+});
+
 
 // Global error handler for catching async errors
 app.use((err, req, res, next) => {

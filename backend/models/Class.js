@@ -17,10 +17,11 @@ const classSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    imageURL: {
-        type: String,
+    image: {
+        type: Buffer,
         required: false
     }
 });
+
 const Class = mongoose.model('Class', classSchema);
 module.exports = Class;

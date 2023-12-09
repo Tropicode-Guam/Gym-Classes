@@ -12,6 +12,8 @@ function Admin() {
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
     const [size, setSize] = useState('');
+    // New state for image file
+    const [image, setImage] = useState(null);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -49,19 +51,25 @@ function Admin() {
     };
 
     const handleNewClass = async (event) => {
-        event.preventDefault()
+        event.preventDefault();
 
-        const payload = {
-            title, description, date, size, key
-        }
+        document.getElementById("key").value = key
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('date', date);
+        formData.append('size', size);
+        formData.append('image', image); // Add image file to the form data
+
         try {
-            // Send a POST request to the /login endpoint
+            // Send a POST request with form data
             const response = await fetch(`${API_BASE}/classes`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}` // Add your auth token here
+                    // 'Content-Type': 'application/json', // Do not set content type when sending form data
                 },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             // Check if the request was successful
@@ -85,14 +93,26 @@ function Admin() {
         }
     }
 
-    
+    // Function to handle image file change
+    const handleImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setImage(e.target.files[0]);
+        }
+    }
+
+
     // TODO put these in their own components
     if (loggedIn) {
         return (
             <div className="admin-page">
                 <h1>Create a new class</h1>
                 <form onSubmit={handleNewClass}>
+
                     <div>
+                        <input
+                            type="hidden"
+                            id="key"
+                        ></input>
                         <label htmlFor="title">Title</label>
                         <input
                             type="text"
@@ -128,6 +148,15 @@ function Admin() {
                             onChange={(e) => setSize(e.target.value)}
                         />
                     </div>
+                    <div>
+                        <label htmlFor="image">Image:</label>
+                        <input
+                            type="file"
+                            id="image"
+                            onChange={handleImageChange}
+                        />
+                    </div>
+
                     <button type="submit">Add Class</button>
                 </form>
             </div>
