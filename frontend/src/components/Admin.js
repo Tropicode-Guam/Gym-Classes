@@ -53,8 +53,8 @@ function Admin() {
     const handleNewClass = async (event) => {
         event.preventDefault();
 
-        document.getElementById("key").value = key
         const formData = new FormData();
+        formData.append('key', key)
         formData.append('title', title);
         formData.append('description', description);
         formData.append('date', date);
@@ -65,10 +65,6 @@ function Admin() {
             // Send a POST request with form data
             const response = await fetch(`${API_BASE}/classes`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${key}` // Add your auth token here
-                    // 'Content-Type': 'application/json', // Do not set content type when sending form data
-                },
                 body: formData,
             });
 
@@ -109,10 +105,6 @@ function Admin() {
                 <form onSubmit={handleNewClass}>
 
                     <div>
-                        <input
-                            type="hidden"
-                            id="key"
-                        ></input>
                         <label htmlFor="title">Title</label>
                         <input
                             type="text"
