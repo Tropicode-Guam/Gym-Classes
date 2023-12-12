@@ -2,6 +2,35 @@ import React, { useState } from 'react';
 
 const API_BASE = process.env.REACT_APP_API
 
+
+// https://medium.com/frontend-canteen/how-to-detect-file-type-using-javascript-251f67679035
+function check(headers) {
+    return async (file, options={
+        offset: 0
+    })=> {
+        let buffers = await readBuffer(file, 0, 8)
+        buffers = new Uint8Array(buffers)
+        return headers.every((header,index)=>header === buffers[options.offset + index])
+    };
+}
+
+function readBuffer(file, start=0, end=2) {
+    return new Promise((resolve,reject)=>{
+        const reader = new FileReader();
+        reader.onload = ()=>{
+            resolve(reader.result);
+        }
+        ;
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file.slice(start, end));
+    }
+    );
+}
+
+const isPNG = check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const isJPEG = check([0xff, 0xd8, 0xff]);
+const SUPPORTED_FILE_TYPES = {'image/png': isPNG, 'image/jpeg': isJPEG}
+
 function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -14,6 +43,7 @@ function Admin() {
     const [size, setSize] = useState('');
     // New state for image file
     const [image, setImage] = useState(null);
+    const [imageType, setImageType] = useState(null)
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -60,6 +90,7 @@ function Admin() {
         formData.append('date', date);
         formData.append('size', size);
         formData.append('image', image); // Add image file to the form data
+        formData.append('imageType', imageType)
 
         try {
             // Send a POST request with form data
@@ -90,9 +121,25 @@ function Admin() {
     }
 
     // Function to handle image file change
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
-            setImage(e.target.files[0]);
+            let file = e.target.files[0]
+            let supported = false
+            let imageType = null
+            for (let stamp of Object.keys(SUPPORTED_FILE_TYPES)) {
+                let fcheck = SUPPORTED_FILE_TYPES[stamp]
+                if (await fcheck(file)) {
+                    supported = true
+                    imageType = stamp
+                    break
+                }
+            }
+            if (!supported) {
+                alert(`The only supported file types are ${Object.keys(SUPPORTED_FILE_TYPES).join(' ')}`)
+                return
+            }
+            setImage(file);
+            setImageType(imageType);
         }
     }
 

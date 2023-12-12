@@ -20,6 +20,10 @@ const classSchema = new mongoose.Schema({
     image: {
         type: Buffer,
         required: false
+    },
+    imageType: {
+        type: String,
+        required: false
     }
 });
 
