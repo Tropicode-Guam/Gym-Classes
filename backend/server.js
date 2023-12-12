@@ -1,5 +1,6 @@
 // Import necessary libraries
 const express = require('express');
+const ObjectId = require('mongodb').ObjectId
 const mongoose = require('mongoose');
 const cors = require('cors');
 const router = express.Router()
@@ -58,6 +59,29 @@ router.get('/classes', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+router.get('/images/:classid', async (req, res) => {
+  // find the class
+  console.log(req.params.classid)
+  const oid = new ObjectId(req.params.classid)
+  const classObj = (await Class.find({_id: oid}))[0]
+  if (!classObj) {
+    res.status(404)
+    return res.end()
+  }
+  // convert to binary
+  let img;
+  try {
+    img = Buffer.from(classObj.image, 'base64')
+  } catch {
+    res.status(404)
+    return res.end()
+  }
+  // send it
+  res.set("Content-Type", classObj.imageType)
+  res.send(img)
+  res.end()
+})
 
 router.post('/login', async (req, res) => {
   try {
