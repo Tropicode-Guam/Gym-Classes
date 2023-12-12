@@ -62,7 +62,6 @@ router.get('/classes', async (req, res) => {
 
 router.get('/images/:classid', async (req, res) => {
   // find the class
-  console.log(req.params.classid)
   const oid = new ObjectId(req.params.classid)
   const classObj = (await Class.find({_id: oid}))[0]
   if (!classObj) {
