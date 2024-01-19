@@ -24,6 +24,14 @@ const classSchema = new mongoose.Schema({
     imageType: {
         type: String,
         required: false
+    },
+    days: {
+        type: [Number],
+        required: false
+    },
+    recurring: {
+        type: Boolean,
+        required: true
     }
 });
 

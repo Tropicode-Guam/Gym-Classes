@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DayPicker from './DayPicker';
 
 const API_BASE = process.env.REACT_APP_API
 
@@ -45,6 +46,28 @@ function Admin() {
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null)
 
+    // Added state for RepeatSchedulePicker
+    const [selectedDays, setSelectedDays] = useState({
+        Monday: false,
+        Tuesday: false,
+        Wednesday: false,
+        Thursday: false,
+        Friday: false,
+        Saturday: false,
+        Sunday: false,
+    });
+    const [recurring, setRecurring] = useState('none');
+
+    // Handlers for RepeatSchedulePicker
+    const handleDayChange = (day) => {
+        setSelectedDays(prev => ({ ...prev, [day]: !prev[day] }));
+    };
+
+    console.log('here')
+    const handleFrequencyChange = (e) => {
+        setRecurring(e.target.value);
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -64,7 +87,6 @@ function Admin() {
             // Check if the request was successful
             if (response.ok) {
                 const data = await response.json();
-                console.log('Login successful:', data);
                 setLoggedIn(true)
                 setKey(data)
                 setUsername('')
@@ -194,6 +216,30 @@ function Admin() {
                             id="image"
                             onChange={handleImageChange}
                         />
+                    </div>
+                    <div>
+                        <h2>Select Days</h2>
+                        {Object.keys(selectedDays).map((day) => (
+                            <div key={day}>
+                            <input
+                                type="checkbox"
+                                id={day}
+                                checked={selectedDays[day]}
+                                onChange={() => handleDayChange(day)}
+                            />
+                            <label htmlFor={day}>{day}</label>
+                            </div>
+                        ))}
+
+                        <h2>Repeat Frequency</h2>
+                        <div>
+                        <select value={repeatFrequency} onChange={handleFrequencyChange}>
+                            <option value="none">Weekly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            {/* Add other frequencies as needed */}
+                        </select>
+                        </div>
                     </div>
 
                     <button type="submit">Add Class</button>
