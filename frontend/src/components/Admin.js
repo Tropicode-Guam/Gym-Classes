@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import DayPicker from './DayPicker';
+// import DayPicker from './DayPicker';
 
 const API_BASE = process.env.REACT_APP_API
 
 
 // https://medium.com/frontend-canteen/how-to-detect-file-type-using-javascript-251f67679035
 function check(headers) {
-    return async (file, options={
+    return async (file, options = {
         offset: 0
-    })=> {
+    }) => {
         let buffers = await readBuffer(file, 0, 8)
         buffers = new Uint8Array(buffers)
-        return headers.every((header,index)=>header === buffers[options.offset + index])
+        return headers.every((header, index) => header === buffers[options.offset + index])
     };
 }
 
-function readBuffer(file, start=0, end=2) {
-    return new Promise((resolve,reject)=>{
+function readBuffer(file, start = 0, end = 2) {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = ()=>{
+        reader.onload = () => {
             resolve(reader.result);
         }
-        ;
+            ;
         reader.onerror = reject;
         reader.readAsArrayBuffer(file.slice(start, end));
     }
@@ -30,7 +30,7 @@ function readBuffer(file, start=0, end=2) {
 
 const isPNG = check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const isJPEG = check([0xff, 0xd8, 0xff]);
-const SUPPORTED_FILE_TYPES = {'image/png': isPNG, 'image/jpeg': isJPEG}
+const SUPPORTED_FILE_TYPES = { 'image/png': isPNG, 'image/jpeg': isJPEG }
 
 function Admin() {
     const [username, setUsername] = useState('');
@@ -38,16 +38,23 @@ function Admin() {
     const [loggedIn, setLoggedIn] = useState('');
     const [key, setKey] = useState('');
 
+    // what exactly are we trying to send in the formdata?
+
+    // title, 
+    // description, 
+    // date, 
+    // size, 
+    // image, 
+    // days, 
+    // frequency
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
     const [size, setSize] = useState('');
-    // New state for image file
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null)
-
-    // Added state for RepeatSchedulePicker
-    const [selectedDays, setSelectedDays] = useState({
+    const [days, setDays] = useState({
         Monday: false,
         Tuesday: false,
         Wednesday: false,
@@ -56,16 +63,15 @@ function Admin() {
         Saturday: false,
         Sunday: false,
     });
-    const [recurring, setRecurring] = useState('none');
+    const [frequency, setFrequency] = useState('none');
 
     // Handlers for RepeatSchedulePicker
     const handleDayChange = (day) => {
-        setSelectedDays(prev => ({ ...prev, [day]: !prev[day] }));
+        setDays(prev => ({ ...prev, [day]: !prev[day] }));
     };
 
-    console.log('here')
     const handleFrequencyChange = (e) => {
-        setRecurring(e.target.value);
+        setFrequency(e.target.value);
     };
 
     const handleSubmit = async (event) => {
@@ -103,6 +109,10 @@ function Admin() {
     };
 
     const handleNewClass = async (event) => {
+
+
+        const daysAsNumbers = getDaysAsNumbers(); // Get the array of selected day numbers
+
         event.preventDefault();
 
         const formData = new FormData();
@@ -111,8 +121,11 @@ function Admin() {
         formData.append('description', description);
         formData.append('date', date);
         formData.append('size', size);
-        formData.append('image', image); // Add image file to the form data
-        formData.append('imageType', imageType)
+        formData.append('image', image);
+        formData.append('imageType', imageType);
+        formData.append('days', daysAsNumbers);
+        formData.append('frequency', frequency)
+
 
         try {
             // Send a POST request with form data
@@ -124,7 +137,6 @@ function Admin() {
             // Check if the request was successful
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
 
                 setTitle('')
                 setDescription('')
@@ -142,7 +154,6 @@ function Admin() {
         }
     }
 
-    // Function to handle image file change
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
             let file = e.target.files[0]
@@ -164,6 +175,23 @@ function Admin() {
             setImageType(imageType);
         }
     }
+
+    const getDaysAsNumbers = () => {
+        const dayMapping = {
+            Sunday: 0, // Assuming Sunday as the first day of the week
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+        };
+    
+        return Object.entries(days)
+            .filter(([day, isSelected]) => isSelected)
+            .map(([day]) => dayMapping[day]);
+    };
+    
 
 
     // TODO put these in their own components
@@ -219,26 +247,26 @@ function Admin() {
                     </div>
                     <div>
                         <h2>Select Days</h2>
-                        {Object.keys(selectedDays).map((day) => (
+                        {Object.keys(days).map((day) => (
                             <div key={day}>
-                            <input
-                                type="checkbox"
-                                id={day}
-                                checked={selectedDays[day]}
-                                onChange={() => handleDayChange(day)}
-                            />
-                            <label htmlFor={day}>{day}</label>
+                                <input
+                                    type="checkbox"
+                                    id={day}
+                                    checked={days[day]}
+                                    onChange={() => handleDayChange(day)}
+                                />
+                                <label htmlFor={day}>{day}</label>
                             </div>
                         ))}
 
                         <h2>Repeat Frequency</h2>
                         <div>
-                        <select value={repeatFrequency} onChange={handleFrequencyChange}>
-                            <option value="none">Weekly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            {/* Add other frequencies as needed */}
-                        </select>
+                            <select value={frequency} onChange={handleFrequencyChange}>
+                                <option value="none">None</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="bi-weekly">Bi-Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
                         </div>
                     </div>
 

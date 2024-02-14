@@ -63,7 +63,7 @@ router.get('/classes', async (req, res) => {
 router.get('/images/:classid', async (req, res) => {
   // find the class
   const oid = new ObjectId(req.params.classid)
-  const classObj = (await Class.find({_id: oid}))[0]
+  const classObj = (await Class.find({ _id: oid }))[0]
   if (!classObj) {
     res.status(404)
     return res.end()
@@ -109,15 +109,29 @@ router.post('/classes', upload.single('image'), async (req, res) => {
   if (!auth.authenticate(req.body.key)) {
     return res.status(401).json("forbidden");
   }
+
+
+  temp = req.body
+
+  days = temp['days'].split(',').map(Number)
+
+  temp['days'] = days
+
   try {
+
     const newClass = new Class({
       ...req.body,
       image: req.file.buffer // Storing the image buffer in the Class model
     });
+
+
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
+
   } catch (error) {
+
     res.status(500).send(error.message);
+
   }
 });
 

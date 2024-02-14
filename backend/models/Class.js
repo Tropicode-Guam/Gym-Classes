@@ -29,8 +29,8 @@ const classSchema = new mongoose.Schema({
         type: [Number],
         required: false
     },
-    recurring: {
-        type: Boolean,
+    frequency: {
+        type: String,
         required: true
     }
 });
