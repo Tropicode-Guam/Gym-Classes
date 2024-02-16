@@ -3,6 +3,9 @@ import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'; // Import the CSS for the calendar
+
 
 
 import './Landing.css';
@@ -42,6 +45,11 @@ const Landing = () => {
         }
     };
 
+    // takes in a day and a class instance, returns true if the class is on that day
+    const isThisAClassDay = (date, classInstance) => {
+        const classDate = new Date(classInstance.date);
+        return date.toDateString() === classDate.toDateString();
+    };
 
     // Use useEffect to fetch classes when the component mounts
     useEffect(() => {
@@ -75,13 +83,20 @@ const Landing = () => {
                         >
                             <Box sx={style}>
                                 <Typography id="modal-modal-title" variant="h6" component="h2">
-                                    Text in a modal
+                                    Select a Date
                                 </Typography>
-                                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                                    Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                                </Typography>
+                                <Calendar
+                                    // onChange={handleDateChange}
+                                    // value={date}
+                                    tileDisabled={({date}) => {
+                                        // console.log(date)   
+                                        // return date.getDay() % 3 === 0
+                                        return !isThisAClassDay(date, classItem)
+                                    }}
+                                />
                             </Box>
-                        </Modal>                    </li>
+                        </Modal>
+                    </li>
                 ))}
             </ul>
         </div>

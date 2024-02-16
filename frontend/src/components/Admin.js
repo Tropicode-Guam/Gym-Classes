@@ -38,16 +38,6 @@ function Admin() {
     const [loggedIn, setLoggedIn] = useState('');
     const [key, setKey] = useState('');
 
-    // what exactly are we trying to send in the formdata?
-
-    // title, 
-    // description, 
-    // date, 
-    // size, 
-    // image, 
-    // days, 
-    // frequency
-
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
@@ -65,7 +55,6 @@ function Admin() {
     });
     const [frequency, setFrequency] = useState('none');
 
-    // Handlers for RepeatSchedulePicker
     const handleDayChange = (day) => {
         setDays(prev => ({ ...prev, [day]: !prev[day] }));
     };
@@ -184,6 +173,7 @@ function Admin() {
             }
             setImage(file);
             setImageType(imageType);
+
         }
     }
 
@@ -197,13 +187,11 @@ function Admin() {
             Friday: 5,
             Saturday: 6,
         };
-    
+
         return Object.entries(days)
             .filter(([day, isSelected]) => isSelected)
             .map(([day]) => dayMapping[day]);
     };
-    
-
 
     // TODO put these in their own components
     if (loggedIn) {
@@ -273,20 +261,20 @@ function Admin() {
                     {/* when frequency is none or daily, DONT show the select days div */}
 
                     {(frequency === 'weekly') &&
-                    <div>
-                        <h2>Select Days</h2>
-                        {Object.keys(days).map((day) => (
-                            <div key={day}>
-                                <input
-                                    type="checkbox"
-                                    id={day}
-                                    checked={days[day]}
-                                    onChange={() => handleDayChange(day)}
-                                />
-                                <label htmlFor={day}>{day}</label>
-                            </div>
-                        ))}
-                    </div>
+                        <div>
+                            <h2>Select Days</h2>
+                            {Object.keys(days).map((day) => (
+                                <div key={day}>
+                                    <input
+                                        type="checkbox"
+                                        id={day}
+                                        checked={days[day]}
+                                        onChange={() => handleDayChange(day)}
+                                    />
+                                    <label htmlFor={day}>{day}</label>
+                                </div>
+                            ))}
+                        </div>
                     }
 
 
