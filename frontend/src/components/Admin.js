@@ -110,6 +110,18 @@ function Admin() {
 
     const handleNewClass = async (event) => {
 
+        // before frequency is sent, the 1st 2 options should reset the selected days
+        if (frequency !== 'weekly') {
+            setDays({
+                Monday: false,
+                Tuesday: false,
+                Wednesday: false,
+                Thursday: false,
+                Friday: false,
+                Saturday: false,
+                Sunday: false,
+            });
+        }
 
         const daysAsNumbers = getDaysAsNumbers(); // Get the array of selected day numbers
 
@@ -125,7 +137,6 @@ function Admin() {
         formData.append('imageType', imageType);
         formData.append('days', daysAsNumbers);
         formData.append('frequency', frequency)
-
 
         try {
             // Send a POST request with form data
@@ -245,6 +256,23 @@ function Admin() {
                             onChange={handleImageChange}
                         />
                     </div>
+
+                    <div>
+                        <h2>Repeat Frequency</h2>
+                        <div>
+                            <select value={frequency} onChange={handleFrequencyChange}>
+                                <option value="none">None</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="bi-weekly">Bi-Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* when frequency is none or daily, DONT show the select days div */}
+
+                    {(frequency === 'weekly') &&
                     <div>
                         <h2>Select Days</h2>
                         {Object.keys(days).map((day) => (
@@ -258,17 +286,10 @@ function Admin() {
                                 <label htmlFor={day}>{day}</label>
                             </div>
                         ))}
-
-                        <h2>Repeat Frequency</h2>
-                        <div>
-                            <select value={frequency} onChange={handleFrequencyChange}>
-                                <option value="none">None</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="bi-weekly">Bi-Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
                     </div>
+                    }
+
+
 
                     <button type="submit">Add Class</button>
                 </form>

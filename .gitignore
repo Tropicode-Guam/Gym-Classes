@@ -24,3 +24,6 @@ yarn-error.log*
 
 # db
 db/data
+
+# misc
+todo.txt
