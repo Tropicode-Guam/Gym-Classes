@@ -17,10 +17,23 @@ const classSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    imageURL: {
+    image: {
+        type: Buffer,
+        required: false
+    },
+    imageType: {
         type: String,
         required: false
+    },
+    days: {
+        type: [Number],
+        required: false
+    },
+    frequency: {
+        type: String,
+        required: true
     }
 });
+
 const Class = mongoose.model('Class', classSchema);
 module.exports = Class;

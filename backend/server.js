@@ -1,5 +1,6 @@
 // Import necessary libraries
 const express = require('express');
+const ObjectId = require('mongodb').ObjectId
 const mongoose = require('mongoose');
 const cors = require('cors');
 const router = express.Router()
@@ -59,6 +60,28 @@ router.get('/classes', async (req, res) => {
   }
 });
 
+router.get('/images/:classid', async (req, res) => {
+  // find the class
+  const oid = new ObjectId(req.params.classid)
+  const classObj = (await Class.find({ _id: oid }))[0]
+  if (!classObj) {
+    res.status(404)
+    return res.end()
+  }
+  // convert to binary
+  let img;
+  try {
+    img = Buffer.from(classObj.image, 'base64')
+  } catch {
+    res.status(404)
+    return res.end()
+  }
+  // send it
+  res.set("Content-Type", classObj.imageType)
+  res.send(img)
+  res.end()
+})
+
 router.post('/login', async (req, res) => {
   try {
     await mongoose.createConnection(generate_db_url(req.body.username, req.body.password)).asPromise()
@@ -69,19 +92,61 @@ router.post('/login', async (req, res) => {
   }
 })
 
-// Define the POST endpoint for creating a new class
-router.post('/classes', async (req, res) => {
-  if (!auth.authenticate(req.body.key)) {
-    return res.status(401).json("forbidden")
-  }
-  try {
-    const newClass = new Class(req.body);
-    const savedClass = await newClass.save();
-    res.status(201).json(savedClass);
-  } catch (error) {
-    res.status(500).send(error.message);
+const multer = require('multer');
+const upload = multer({
+  limits: {
+    fileSize: 1000000 // Limit the file size (e.g., 1MB)
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error('Please upload an image (jpg, jpeg, png).'));
+    }
+    cb(undefined, true);
   }
 });
+
+router.post('/classes', upload.single('image'), async (req, res) => {
+  if (!auth.authenticate(req.body.key)) {
+    return res.status(401).json("forbidden");
+  }
+
+
+  temp = req.body
+
+  days = temp['days'].split(',').map(Number)
+
+  temp['days'] = days
+
+  try {
+
+    const newClass = new Class({
+      ...req.body,
+      image: req.file.buffer // Storing the image buffer in the Class model
+    });
+
+
+    const savedClass = await newClass.save();
+    res.status(201).json(savedClass);
+
+  } catch (error) {
+
+    res.status(500).send(error.message);
+
+  }
+});
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    // Handle multer-specific errors here
+    return res.status(400).send(err.message);
+  }
+  if (err) {
+    console.error(err.stack);
+    return res.status(500).send('Something broke!');
+  }
+  next();
+});
+
 
 // Global error handler for catching async errors
 app.use((err, req, res, next) => {
