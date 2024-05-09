@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 // import DayPicker from './DayPicker';
+import './css.css'; // Add your custom CSS file here
 
 const API_BASE = process.env.REACT_APP_API
 
@@ -276,9 +277,6 @@ function Admin() {
                             ))}
                         </div>
                     }
-
-
-
                     <button type="submit">Add Class</button>
                 </form>
             </div>

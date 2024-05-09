@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const router = express.Router()
 const auth = require('./utils/auth')
+const sharp = require('sharp');
 
 const API_BASE = process.env['API_BASE']
 
@@ -95,7 +96,7 @@ router.post('/login', async (req, res) => {
 const multer = require('multer');
 const upload = multer({
   limits: {
-    fileSize: 1000000 // Limit the file size (e.g., 1MB)
+    fileSize: 10000000 // Limit the file size (e.g., 1MB)
   },
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -110,28 +111,19 @@ router.post('/classes', upload.single('image'), async (req, res) => {
     return res.status(401).json("forbidden");
   }
 
-
   temp = req.body
-
   days = temp['days'].split(',').map(Number)
-
   temp['days'] = days
 
   try {
-
     const newClass = new Class({
       ...req.body,
       image: req.file.buffer // Storing the image buffer in the Class model
     });
-
-
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
-
   } catch (error) {
-
     res.status(500).send(error.message);
-
   }
 });
 
@@ -146,7 +138,6 @@ app.use((err, req, res, next) => {
   }
   next();
 });
-
 
 // Global error handler for catching async errors
 app.use((err, req, res, next) => {
