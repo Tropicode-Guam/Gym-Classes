@@ -56,6 +56,30 @@ function ClassList() {
     };
 
 
+    const handleDeleteClass = async (classId) => {
+
+        console.log("classid deleting", classId)
+
+        try {
+            // Send a DELETE request to the /classes/:classId route
+            const response = await axios.delete(`${API_BASE}/classes/${classId}`);
+
+            // Check if the request was successful
+            if (response.status === 200) {
+                // Fetch the updated list of classes
+                const updatedClasses = await getClasses();
+                setClasses(updatedClasses);
+            } else {
+                // Handle errors (e.g., show error message)
+                console.error('Error deleting class:', response
+                    .status);
+            }
+        }
+        catch (error) {
+            console.error('Error deleting class:', error);
+        }
+    }
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -85,6 +109,13 @@ function ClassList() {
                                 return () => { handleViewUsers(classItem._id) }
                             })(classItem)
                         }>View Users</button>
+
+                        {/* add a red delete class button */}
+                        <button className='red-button' onClick={
+                            ((classItem) => {
+                                return () => { handleDeleteClass(classItem._id) }
+                            })(classItem)
+                        }>Delete Class</button>
                     </li>
                 ))}
             </ul>
@@ -93,7 +124,7 @@ function ClassList() {
             {showModal && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+                        <button className="close" onClick={() => setShowModal(false)}>&times;</button>
                         <h2>Users for {selectedClass && selectedClass.title}</h2>
                         <ul>
                             {users.map((user) => (

@@ -111,6 +111,10 @@ form {
     text-align: left;
 }
 
+.red-button {
+    background-color: #ff0000;
+    color: white;
+}
 
 .modal h2 {
     color: #ffffff;

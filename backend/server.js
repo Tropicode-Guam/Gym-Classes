@@ -102,6 +102,44 @@ router.get('/classes/:classId/users', async (req, res) => {
 });
 
 
+
+
+
+
+// Define the DELETE endpoint for deleting a class
+router.delete('/classes/:classId', async (req, res) => {
+
+  console.log("classid deleting from server", req.params.classId)
+
+  try {
+    // Extract the class ID from the request parameters
+    const classId = req.params.classId;
+
+    // Find the class with the specified ID
+    const classObj = await Class.findById(classId);
+
+    if (!classObj) {
+      // If the class is not found, return a 404 status
+      return res.status(405).json({ error: 'Class not found' });
+    }
+
+    // Delete the class
+    await Class.findByIdAndDelete(classId);
+
+    // Return a success response
+    res.json({ message: 'Class deleted successfully' });
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error('Error deleting class:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+
+
 router.get('/images/:classid', async (req, res) => {
   // find the class
   const oid = new ObjectId(req.params.classid)
