@@ -5,11 +5,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const router = express.Router()
 const auth = require('./utils/auth')
+const sharp = require('sharp');
 
 const API_BASE = process.env['API_BASE']
 
 // Import your models
 const Class = require('./models/Class'); // Ensure you have created the Class model
+const User = require('./models/User'); // Ensure you have created the User model
+const SignUp = require('./models/SignUp'); // Ensure you have created the SignUp model
 
 // Load environment variables
 require('dotenv').config();
@@ -60,6 +63,45 @@ router.get('/classes', async (req, res) => {
   }
 });
 
+// Define the GET endpoint for fetching users signed up for a class
+router.get('/classes/:classId/users', async (req, res) => {
+  try {
+    // Extract the class ID from the request parameters
+    const classId = req.params.classId;
+
+    console.log('classid from backend', classId)
+
+    // Find the class with the specified ID
+    const classObj = await Class.findById(classId);
+
+    console.log('classobj from backend',classObj)
+
+    if (!classObj) {
+      // If the class is not found, return a 404 status
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+
+
+
+    
+    // Retrieve the users signed up for the class
+    // Assuming you have a 'users' field in your Class model containing user IDs
+    const signups = await SignUp.find({ selectedClass: classId });
+
+
+
+    // Return the list of users
+    res.json(signups);
+
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error('Error fetching users for class:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 router.get('/images/:classid', async (req, res) => {
   // find the class
   const oid = new ObjectId(req.params.classid)
@@ -95,7 +137,7 @@ router.post('/login', async (req, res) => {
 const multer = require('multer');
 const upload = multer({
   limits: {
-    fileSize: 1000000 // Limit the file size (e.g., 1MB)
+    fileSize: 10000000 // Limit the file size (e.g., 1MB)
   },
   fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -105,33 +147,59 @@ const upload = multer({
   }
 });
 
+// Define the POST endpoint for signing up a user for a class
+router.post('/signup', async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { name, phone, insurance, selectedDate, selectedClass } = req.body;
+
+    // Perform any necessary validation on the data
+
+    // Construct the signup object
+    const signupData = {
+      name,
+      phone,
+      insurance,
+      selectedDate,
+      selectedClass
+    };
+
+    // Save the signup data to the database or perform any necessary operations
+    // You can use the selectedClass ID to reference the class in your database
+    // Example:
+
+
+    const signup = new SignUp(signupData);
+    await signup.save();
+
+    // Send a success response
+    res.status(201).json({ message: 'User signed up successfully!', signupData });
+  } catch (error) {
+    // Handle any errors that occur during the signup process
+    console.error('Error signing up:', error.message);
+    res.status(500).json({ error: 'Failed to sign up' });
+  }
+});
+
+
 router.post('/classes', upload.single('image'), async (req, res) => {
   if (!auth.authenticate(req.body.key)) {
     return res.status(401).json("forbidden");
   }
 
-
   temp = req.body
-
   days = temp['days'].split(',').map(Number)
-
   temp['days'] = days
 
   try {
-
     const newClass = new Class({
       ...req.body,
       image: req.file.buffer // Storing the image buffer in the Class model
     });
-
-
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
-
   } catch (error) {
-
     res.status(500).send(error.message);
-
   }
 });
 
@@ -146,7 +214,6 @@ app.use((err, req, res, next) => {
   }
   next();
 });
-
 
 // Global error handler for catching async errors
 app.use((err, req, res, next) => {

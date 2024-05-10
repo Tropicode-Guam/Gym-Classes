@@ -14,6 +14,7 @@ services:
       - VIRTUAL_HOST=localhost
       - VIRTUAL_PORT=3000
       - NODE_ENV=development
+      - API_BASE=/api
     volumes:
       - ./frontend/src:/usr/src/app/src:ro
       - ./frontend/public:/usr/src/app/public:ro

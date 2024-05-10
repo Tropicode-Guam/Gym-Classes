@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 // import DayPicker from './DayPicker';
+import './css.css'; // Add your custom CSS file here
+
+import ClassList from './ClassList';
 
 const API_BASE = process.env.REACT_APP_API
 
@@ -36,17 +39,7 @@ function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loggedIn, setLoggedIn] = useState('');
-    const [key, setKey] = useState('');
-
-    // what exactly are we trying to send in the formdata?
-
-    // title, 
-    // description, 
-    // date, 
-    // size, 
-    // image, 
-    // days, 
-    // frequency
+    // const [key, setKey] = useState('');
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -65,7 +58,6 @@ function Admin() {
     });
     const [frequency, setFrequency] = useState('none');
 
-    // Handlers for RepeatSchedulePicker
     const handleDayChange = (day) => {
         setDays(prev => ({ ...prev, [day]: !prev[day] }));
     };
@@ -92,9 +84,9 @@ function Admin() {
 
             // Check if the request was successful
             if (response.ok) {
-                const data = await response.json();
+                // const data = await response.json();
                 setLoggedIn(true)
-                setKey(data)
+                // setKey(data)
                 setUsername('')
                 setPassword('')
                 // Handle login success (e.g., redirect to another page)
@@ -110,13 +102,25 @@ function Admin() {
 
     const handleNewClass = async (event) => {
 
+        // before frequency is sent, the 1st 2 options should reset the selected days
+        if (frequency !== 'weekly') {
+            setDays({
+                Monday: false,
+                Tuesday: false,
+                Wednesday: false,
+                Thursday: false,
+                Friday: false,
+                Saturday: false,
+                Sunday: false,
+            });
+        }
 
         const daysAsNumbers = getDaysAsNumbers(); // Get the array of selected day numbers
 
         event.preventDefault();
 
         const formData = new FormData();
-        formData.append('key', key)
+        // formData.append('key', key)
         formData.append('title', title);
         formData.append('description', description);
         formData.append('date', date);
@@ -125,7 +129,6 @@ function Admin() {
         formData.append('imageType', imageType);
         formData.append('days', daysAsNumbers);
         formData.append('frequency', frequency)
-
 
         try {
             // Send a POST request with form data
@@ -136,7 +139,6 @@ function Admin() {
 
             // Check if the request was successful
             if (response.ok) {
-                const data = await response.json();
 
                 setTitle('')
                 setDescription('')
@@ -173,6 +175,7 @@ function Admin() {
             }
             setImage(file);
             setImageType(imageType);
+
         }
     }
 
@@ -186,13 +189,11 @@ function Admin() {
             Friday: 5,
             Saturday: 6,
         };
-    
+
         return Object.entries(days)
             .filter(([day, isSelected]) => isSelected)
             .map(([day]) => dayMapping[day]);
     };
-    
-
 
     // TODO put these in their own components
     if (loggedIn) {
@@ -245,24 +246,13 @@ function Admin() {
                             onChange={handleImageChange}
                         />
                     </div>
-                    <div>
-                        <h2>Select Days</h2>
-                        {Object.keys(days).map((day) => (
-                            <div key={day}>
-                                <input
-                                    type="checkbox"
-                                    id={day}
-                                    checked={days[day]}
-                                    onChange={() => handleDayChange(day)}
-                                />
-                                <label htmlFor={day}>{day}</label>
-                            </div>
-                        ))}
 
+                    <div>
                         <h2>Repeat Frequency</h2>
                         <div>
                             <select value={frequency} onChange={handleFrequencyChange}>
                                 <option value="none">None</option>
+                                <option value="daily">Daily</option>
                                 <option value="weekly">Weekly</option>
                                 <option value="bi-weekly">Bi-Weekly</option>
                                 <option value="monthly">Monthly</option>
@@ -270,8 +260,29 @@ function Admin() {
                         </div>
                     </div>
 
+                    {/* when frequency is none or daily, DONT show the select days div */}
+
+                    {(frequency === 'weekly') &&
+                        <div>
+                            <h2>Select Days</h2>
+                            {Object.keys(days).map((day) => (
+                                <div key={day}>
+                                    <input
+                                        type="checkbox"
+                                        id={day}
+                                        checked={days[day]}
+                                        onChange={() => handleDayChange(day)}
+                                    />
+                                    <label htmlFor={day}>{day}</label>
+                                </div>
+                            ))}
+                        </div>
+                    }
                     <button type="submit">Add Class</button>
                 </form>
+
+                <ClassList />
+                
             </div>
         )
     } else {

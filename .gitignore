@@ -5,6 +5,8 @@ node_modules
 /.pnp
 .pnp.js
 
+.vscode
+
 package-lock.json
 
 # testing
@@ -24,3 +26,6 @@ yarn-error.log*
 
 # db
 db/data
+
+# misc
+todo.txt

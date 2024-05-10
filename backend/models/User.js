@@ -1,19 +1,13 @@
 const mongoose = require('mongoose');
+
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    phoneNumber: {
-        type: String,
-        required: true
-    },
-    memberType: {
-        type: String,
-        enum: ['hotel', 'gym', 'insurance1', 'insurance2'],
-        required: true
-    }
+  // Define your user schema fields here
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  insurance: { type: String },
+  // Add more fields as needed
 });
 
 const User = mongoose.model('User', userSchema);
+
 module.exports = User;
