@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const signUpSchema = new mongoose.Schema({
     // 
-    classID: {
+    selectedClass: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
@@ -10,15 +10,15 @@ const signUpSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    phoneNum: {
+    phone: {
         type: String,
         required: true
     },
-    insuranceType: {
+    insurance: {
         type: String,
         required: true
     },
-    date: {
+    selectedDate: {
         type: Date,
         required: true
     }
