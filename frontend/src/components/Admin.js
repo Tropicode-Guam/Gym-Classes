@@ -49,6 +49,7 @@ function Admin() {
         Sunday: false,
     });
     const [frequency, setFrequency] = useState('none');
+    const [csvData, setCsvData] = useState([]);
 
     const handleDayChange = (day) => {
         setDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -165,119 +166,146 @@ function Admin() {
             .map(([day]) => dayMapping[day]);
     };
 
-    if (loggedIn) {
-        return (
-            <Container className="admin-page">
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Create a new class
-                </Typography>
-                <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
-                    <TextField
-                        label="Title"
-                        fullWidth
-                        margin="normal"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                    <TextField
-                        label="Description"
-                        fullWidth
-                        margin="normal"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                    <TextField
-                        label="Date"
-                        type="datetime-local"
-                        fullWidth
-                        margin="normal"
-                        InputLabelProps={{ shrink: true }}
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                    />
-                    <TextField
-                        label="Size"
-                        fullWidth
-                        margin="normal"
-                        value={size}
-                        onChange={(e) => setSize(e.target.value)}
-                    />
-                    <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
-                        Upload Image
-                        <input type="file" hidden onChange={handleImageChange} />
-                    </Button>
-                    <Typography variant="h6" component="h2">
-                        Repeat Frequency
+    const fetchSignups = async () => {
+        try {
+            const response = await fetch(`${API_BASE}/signups`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch signups');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'signups.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error fetching signups:', error);
+        }
+    };
+
+    return (
+        <Container className="admin-page">
+            {loggedIn ? (
+                <>
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        Create a new class
                     </Typography>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="frequency-label">Frequency</InputLabel>
-                        <Select
-                            labelId="frequency-label"
-                            value={frequency}
-                            onChange={handleFrequencyChange}
-                        >
-                            <MenuItem value="none">None</MenuItem>
-                            <MenuItem value="daily">Daily</MenuItem>
-                            <MenuItem value="weekly">Weekly</MenuItem>
-                            <MenuItem value="bi-weekly">Bi-Weekly</MenuItem>
-                            <MenuItem value="monthly">Monthly</MenuItem>
-                        </Select>
-                    </FormControl>
-                    {frequency === 'weekly' && (
-                        <FormGroup>
-                            <Typography variant="h6" component="h2">
-                                Select Days
-                            </Typography>
-                            {Object.keys(days).map((day) => (
-                                <FormControlLabel
-                                    key={day}
-                                    control={
-                                        <Checkbox
-                                            checked={days[day]}
-                                            onChange={() => handleDayChange(day)}
-                                        />
-                                    }
-                                    label={day}
-                                />
-                            ))}
-                        </FormGroup>
-                    )}
-                    <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-                        Add Class
+                    <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
+                        <TextField
+                            label="Title"
+                            fullWidth
+                            margin="normal"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                        <TextField
+                            label="Description"
+                            fullWidth
+                            margin="normal"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                        <TextField
+                            label="Date"
+                            type="datetime-local"
+                            fullWidth
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                        />
+                        <TextField
+                            label="Size"
+                            fullWidth
+                            margin="normal"
+                            value={size}
+                            onChange={(e) => setSize(e.target.value)}
+                        />
+                        <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
+                            Upload Image
+                            <input type="file" hidden onChange={handleImageChange} />
+                        </Button>
+                        <Typography variant="h6" component="h2">
+                            Repeat Frequency
+                        </Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel id="frequency-label">Frequency</InputLabel>
+                            <Select
+                                labelId="frequency-label"
+                                value={frequency}
+                                onChange={handleFrequencyChange}
+                            >
+                                <MenuItem value="none">None</MenuItem>
+                                <MenuItem value="daily">Daily</MenuItem>
+                                <MenuItem value="weekly">Weekly</MenuItem>
+                                <MenuItem value="bi-weekly">Bi-Weekly</MenuItem>
+                                <MenuItem value="monthly">Monthly</MenuItem>
+                            </Select>
+                        </FormControl>
+                        {frequency === 'weekly' && (
+                            <FormGroup>
+                                <Typography variant="h6" component="h2">
+                                    Select Days
+                                </Typography>
+                                {Object.keys(days).map((day) => (
+                                    <FormControlLabel
+                                        key={day}
+                                        control={
+                                            <Checkbox
+                                                checked={days[day]}
+                                                onChange={() => handleDayChange(day)}
+                                            />
+                                        }
+                                        label={day}
+                                    />
+                                ))}
+                            </FormGroup>
+                        )}
+                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+                            Add Class
+                        </Button>
+                    </Box>
+                    <ClassList />
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        sx={{ mt: 3 }}
+                        onClick={fetchSignups}
+                    >
+                        Export Signups to CSV
                     </Button>
-                </Box>
-                <ClassList />
-            </Container>
-        );
-    } else {
-        return (
-            <Container className="lock-screen">
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Hilton Gym Panel
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-                    <TextField
-                        label="Username"
-                        fullWidth
-                        margin="normal"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <TextField
-                        label="Password"
-                        type="password"
-                        fullWidth
-                        margin="normal"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-                        Login
-                    </Button>
-                </Box>
-            </Container>
-        );
-    }
+                </>
+            ) : (
+                <Container className="lock-screen">
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        Hilton Gym Panel
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+                        <TextField
+                            label="Username"
+                            fullWidth
+                            margin="normal"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <TextField
+                            label="Password"
+                            type="password"
+                            fullWidth
+                            margin="normal"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+                            Login
+                        </Button>
+                    </Box>
+                </Container>
+            )}
+        </Container>
+    );
 }
 
 export default Admin;

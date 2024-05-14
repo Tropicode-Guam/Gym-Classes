@@ -1,13 +1,14 @@
 // Import necessary libraries
 const express = require('express');
-const ObjectId = require('mongodb').ObjectId
+const ObjectId = require('mongodb').ObjectId;
 const mongoose = require('mongoose');
 const cors = require('cors');
-const router = express.Router()
-const auth = require('./utils/auth')
+const csv = require('express-csv');
+const router = express.Router();
+const auth = require('./utils/auth');
 const sharp = require('sharp');
 
-const API_BASE = process.env['API_BASE']
+const API_BASE = process.env['API_BASE'];
 
 // Import your models
 const Class = require('./models/Class'); // Ensure you have created the Class model
@@ -19,9 +20,9 @@ require('dotenv').config();
 
 // Retrieve DB_URL from environment variables
 function generate_db_url(username, password) {
-  return `mongodb://${username}:${password}@${process.env.DB_HOST}/${process.env.DB_NAME}`
+  return `mongodb://${username}:${password}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
 }
-const DB_URL = generate_db_url(process.env.DB_USER, process.env.DB_PASSWORD)
+const DB_URL = generate_db_url(process.env.DB_USER, process.env.DB_PASSWORD);
 
 if (!DB_URL) {
   console.error('DB_URL is not defined in your environment variables');
@@ -69,27 +70,20 @@ router.get('/classes/:classId/users', async (req, res) => {
     // Extract the class ID from the request parameters
     const classId = req.params.classId;
 
-    console.log('classid from backend', classId)
+    console.log('classid from backend', classId);
 
     // Find the class with the specified ID
     const classObj = await Class.findById(classId);
 
-    console.log('classobj from backend',classObj)
+    console.log('classobj from backend', classObj);
 
     if (!classObj) {
       // If the class is not found, return a 404 status
       return res.status(404).json({ error: 'Class not found' });
     }
 
-
-
-
-    
     // Retrieve the users signed up for the class
-    // Assuming you have a 'users' field in your Class model containing user IDs
     const signups = await SignUp.find({ selectedClass: classId });
-
-
 
     // Return the list of users
     res.json(signups);
@@ -101,15 +95,10 @@ router.get('/classes/:classId/users', async (req, res) => {
   }
 });
 
-
-
-
-
-
 // Define the DELETE endpoint for deleting a class
 router.delete('/classes/:classId', async (req, res) => {
 
-  console.log("classid deleting from server", req.params.classId)
+  console.log("classid deleting from server", req.params.classId);
 
   try {
     // Extract the class ID from the request parameters
@@ -135,42 +124,37 @@ router.delete('/classes/:classId', async (req, res) => {
   }
 });
 
-
-
-
-
-
 router.get('/images/:classid', async (req, res) => {
   // find the class
-  const oid = new ObjectId(req.params.classid)
-  const classObj = (await Class.find({ _id: oid }))[0]
+  const oid = new ObjectId(req.params.classid);
+  const classObj = (await Class.find({ _id: oid }))[0];
   if (!classObj) {
-    res.status(404)
-    return res.end()
+    res.status(404);
+    return res.end();
   }
   // convert to binary
   let img;
   try {
-    img = Buffer.from(classObj.image, 'base64')
+    img = Buffer.from(classObj.image, 'base64');
   } catch {
-    res.status(404)
-    return res.end()
+    res.status(404);
+    return res.end();
   }
   // send it
-  res.set("Content-Type", classObj.imageType)
-  res.send(img)
-  res.end()
-})
+  res.set("Content-Type", classObj.imageType);
+  res.send(img);
+  res.end();
+});
 
 router.post('/login', async (req, res) => {
   try {
-    await mongoose.createConnection(generate_db_url(req.body.username, req.body.password)).asPromise()
-    const hash = await auth.hash(req.body.username, req.body.password, 1)
-    res.status(200).json(hash)
+    await mongoose.createConnection(generate_db_url(req.body.username, req.body.password)).asPromise();
+    const hash = await auth.hash(req.body.username, req.body.password, 1);
+    res.status(200).json(hash);
   } catch (error) {
-    res.status(401).json(false)
+    res.status(401).json(false);
   }
-})
+});
 
 const multer = require('multer');
 const upload = multer({
@@ -206,7 +190,6 @@ router.post('/signup', async (req, res) => {
     // You can use the selectedClass ID to reference the class in your database
     // Example:
 
-
     const signup = new SignUp(signupData);
     await signup.save();
 
@@ -219,15 +202,14 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-
 router.post('/classes', upload.single('image'), async (req, res) => {
   if (!auth.authenticate(req.body.key)) {
     return res.status(401).json("forbidden");
   }
 
-  temp = req.body
-  days = temp['days'].split(',').map(Number)
-  temp['days'] = days
+  temp = req.body;
+  days = temp['days'].split(',').map(Number);
+  temp['days'] = days;
 
   try {
     const newClass = new Class({
@@ -259,8 +241,30 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 });
 
-// hook up router
-app.use(API_BASE, router)
+// Define the endpoint for exporting signups as CSV
+router.get('/signups', async (req, res) => {
+  try {
+    const signups = await SignUp.find({});
+    const csvData = [
+      ['Name', 'Phone', 'Insurance', 'Selected Date', 'Selected Class'],
+      ...signups.map(signup => [
+        signup.name,
+        signup.phone,
+        signup.insurance,
+        signup.selectedDate,
+        signup.selectedClass
+      ])
+    ];
+    res.csv(csvData);
+  } catch (error) {
+    console.error('Error fetching signups:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+// Hook up router
+app.use(API_BASE, router);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
