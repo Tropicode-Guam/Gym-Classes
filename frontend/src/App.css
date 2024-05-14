@@ -40,3 +40,19 @@
 		transform: rotate(360deg);
 	}
 }
+
+.classes-container {
+    margin-left: 0;
+}
+
+.classes-list {
+    list-style: none;
+    padding: 0;
+}
+
+.class-image {
+    width: 200px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}

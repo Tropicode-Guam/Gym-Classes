@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
@@ -18,23 +15,22 @@ const Landing = () => {
         phone: '',
         insurance: '',
         selectedDate: null,
-        selectedClass: null // Add selectedClass field
+        selectedClass: null
     });
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
         setFormData({
             ...formData,
-            selectedClass: classItem._id // Set only the ID of the selected class
+            selectedClass: classItem._id
         });
         setOpen(true);
     };
-    
 
     const handleClose = () => {
         setOpen(false);
         setSelectedClassItem(null);
-        setFormData({ // Reset formData when closing the modal
+        setFormData({
             name: '',
             phone: '',
             insurance: '',
@@ -70,9 +66,6 @@ const Landing = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
-        console.log("formdata", formData);
-
         try {
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
@@ -104,7 +97,7 @@ const Landing = () => {
         });
     };
 
-    function isThisAClassDay(d, classItem) {
+    const isThisAClassDay = (d, classItem) => {
         const { date, frequency, days } = classItem;
         const start = new Date(date);
         const current = new Date(d);
@@ -122,15 +115,9 @@ const Landing = () => {
             case 'daily':
                 return true;
             case 'weekly':
-                if (days.includes(current.getDay())) {
-                    return true;
-                }
-                return false;
+                return days.includes(current.getDay());
             case 'bi-weekly':
-                if (diffDays % 14 < 7 && days.includes(current.getDay())) {
-                    return true;
-                }
-                return false;
+                return diffDays % 14 < 7 && days.includes(current.getDay());
             case 'monthly':
                 return start.getDate() === current.getDate();
             default:
@@ -143,56 +130,88 @@ const Landing = () => {
     }, []);
 
     return (
-        <div className='Classes'>
-            <h1>Classes</h1>
-            {error && <p>Error fetching classes: {error}</p>}
-            <ul>
+        <Container>
+            <Typography variant="h2" gutterBottom>Classes</Typography>
+            {error && <Typography color="error">Error fetching classes: {error}</Typography>}
+            <Grid container spacing={4}>
                 {classes.map((classItem) => (
-                    <li key={classItem._id}>
-                        <h2>{classItem.title}</h2>
-                        <p>Date: {classItem.date}</p>
-                        <p>Description: {classItem.description}</p>
-                        <img
-                            src={`${API_BASE}/images/${classItem._id}`}
-                            onError={({ currentTarget }) => {
-                                currentTarget.onerror = null;
-                            }}
-                            alt={classItem.title}
-                        ></img>
-                        <Button onClick={() => handleOpen(classItem)}>Open modal</Button>
-                    </li>
-                ))}
-                {selectedClassItem && (
-                    <Modal
-                        open={open}
-                        onClose={handleClose}
-                        aria-labelledby="modal-modal-title"
-                        aria-describedby="modal-modal-description"
-                    >
-                        <Box sx={style}>
-                            <Typography id="modal-modal-title" variant="h6" component="h2">
-                                Select a Date
-                            </Typography>
-                            <Calendar
-                                tileDisabled={({ date }) => !isThisAClassDay(date, selectedClassItem)}
-                                onChange={handleDateChange}
+                    <Grid item xs={12} sm={6} md={4} key={classItem._id}>
+                        <Card>
+                            <CardMedia
+                                component="img"
+                                height="140"
+                                image={`${API_BASE}/images/${classItem._id}`}
+                                alt={classItem.title}
+                                onError={({ currentTarget }) => {
+                                    currentTarget.onerror = null;
+                                }}
+                                style={{ objectFit: 'cover' }}
                             />
-                            <form onSubmit={handleSubmit}>
-                                <label htmlFor="name">Name:</label>
-                                <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required />
-                                <label htmlFor="phone">Phone Number:</label>
-                                <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleInputChange} required />
-                                <label htmlFor="insurance">Insurance:</label>
-                                <input type="text" id="insurance" name="insurance" value={formData.insurance} onChange={handleInputChange} required />
-                                <input type="hidden" name="selectedDate" value={formData.selectedDate} />
-                                <input type="hidden" name="selectedClass" value={formData.selectedClass} />
-                                <Button type="submit">Submit</Button>
-                            </form>
-                        </Box>
-                    </Modal>
-                )}
-            </ul>
-        </div>
+                            <CardContent>
+                                <Typography variant="h5" component="div">{classItem.title}</Typography>
+                                <Typography variant="body2" color="text.secondary">Date: {classItem.date}</Typography>
+                                <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
+                            </CardContent>
+                            <CardActions>
+                                <Button variant="contained" onClick={() => handleOpen(classItem)}>Open modal</Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+            {selectedClassItem && (
+                <Modal
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={style}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
+                        <Calendar
+                            tileDisabled={({ date }) => !isThisAClassDay(date, selectedClassItem)}
+                            onChange={handleDateChange}
+                        />
+                        <form onSubmit={handleSubmit}>
+                            <TextField
+                                label="Name"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                                fullWidth
+                                margin="normal"
+                            />
+                            <TextField
+                                label="Phone Number"
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                required
+                                fullWidth
+                                margin="normal"
+                            />
+                            <TextField
+                                label="Insurance"
+                                id="insurance"
+                                name="insurance"
+                                value={formData.insurance}
+                                onChange={handleInputChange}
+                                required
+                                fullWidth
+                                margin="normal"
+                            />
+                            <input type="hidden" name="selectedDate" value={formData.selectedDate} />
+                            <input type="hidden" name="selectedClass" value={formData.selectedClass} />
+                            <Button type="submit" variant="contained" color="primary">Submit</Button>
+                        </form>
+                    </Box>
+                </Modal>
+            )}
+        </Container>
     );
 };
 
