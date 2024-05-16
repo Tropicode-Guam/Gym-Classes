@@ -18,7 +18,16 @@ function ClassList() {
         try {
             const response = await axios.get(`${API_BASE}/classes`);
             if (response.status === 200) {
-                return response.data;
+                const classData = response.data;
+
+                // Fetch user count for each class
+                const classesWithUserCount = await Promise.all(classData.map(async (classItem) => {
+                    const userResponse = await axios.get(`${API_BASE}/classes/${classItem._id}/users`);
+                    const userCount = userResponse.data.length;
+                    return { ...classItem, currentUsers: userCount };
+                }));
+
+                return classesWithUserCount;
             } else {
                 console.error('Error fetching classes:', response.status);
                 return [];
@@ -33,11 +42,12 @@ function ClassList() {
         setSelectedClass(classes.find((classItem) => classItem._id === classId));
         setShowModal(true);
         try {
-            const response = await fetch(`${API_BASE}/classes/${classId}/users`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch users for class');
+            const response = await axios.get(`${API_BASE}/classes/${classId}/users`);
+            if (response.status === 200) {
+                setUsers(response.data);
+            } else {
+                console.error('Failed to fetch users for class:', response.status);
             }
-            setUsers(await response.json());
         } catch (error) {
             console.error('Error fetching users for class:', error);
         }
@@ -75,7 +85,10 @@ function ClassList() {
             <List>
                 {classes.map((classItem) => (
                     <ListItem key={classItem._id}>
-                        <ListItemText primary={classItem.title} secondary={`Description: ${classItem.description}`} />
+                        <ListItemText 
+                            primary={classItem.title} 
+                            secondary={`Description: ${classItem.description} | Users: ${classItem.currentUsers}/${classItem.size}`} 
+                        />
                         <ListItemSecondaryAction>
                             <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
                             <IconButton onClick={() => handleDeleteClass(classItem._id)} aria-label="delete">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { useSnackbar } from 'notistack';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -14,15 +15,17 @@ const Landing = () => {
         name: '',
         phone: '',
         insurance: '',
-        selectedDate: null,
-        selectedClass: null
+        selectedDate: '',
+        selectedClass: ''
     });
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
         setFormData({
             ...formData,
-            selectedClass: classItem._id
+            selectedClass: classItem._id,
+            selectedDate: ''
         });
         setOpen(true);
     };
@@ -34,8 +37,8 @@ const Landing = () => {
             name: '',
             phone: '',
             insurance: '',
-            selectedDate: null,
-            selectedClass: null
+            selectedDate: '',
+            selectedClass: ''
         });
     };
 
@@ -57,8 +60,16 @@ const Landing = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
-            setClasses(data);
+            const classData = await response.json();
+
+            // Fetch user count for each class
+            const classesWithUserCount = await Promise.all(classData.map(async (classItem) => {
+                const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users`);
+                const users = await userResponse.json();
+                return { ...classItem, currentUsers: users.length };
+            }));
+
+            setClasses(classesWithUserCount);
         } catch (error) {
             setError(`Error fetching classes: ${error.message}`);
         }
@@ -67,6 +78,11 @@ const Landing = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
+            if (selectedClassItem.currentUsers >= selectedClassItem.size) {
+                enqueueSnackbar('Class is full!', { variant: 'error' });
+                return;
+            }
+
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
                 headers: {
@@ -74,26 +90,40 @@ const Landing = () => {
                 },
                 body: JSON.stringify(formData)
             });
+
             if (!response.ok) {
                 throw new Error('Failed to sign up');
             }
-            console.log('User signed up successfully!');
+
+            // Update the user count for the class
+            const updatedClasses = classes.map(classItem => 
+                classItem._id === selectedClassItem._id 
+                    ? { ...classItem, currentUsers: classItem.currentUsers + 1 } 
+                    : classItem
+            );
+            setClasses(updatedClasses);
+
+            // Close modal and show success notification
+            handleClose();
+            enqueueSnackbar('Signed up successfully!', { variant: 'success' });
+
         } catch (error) {
             console.error('Error signing up:', error.message);
+            enqueueSnackbar('Error signing up', { variant: 'error' });
         }
     };
 
     const handleInputChange = (event) => {
         setFormData({
             ...formData,
-            [event.target.name]: event.target.value
+            [event.target.name]: event.target.value || ''
         });
     };
 
     const handleDateChange = (date) => {
         setFormData({
             ...formData,
-            selectedDate: date
+            selectedDate: date || ''
         });
     };
 
@@ -123,7 +153,7 @@ const Landing = () => {
             default:
                 return false;
         }
-    }
+    };
 
     useEffect(() => {
         fetchClasses();
@@ -151,9 +181,14 @@ const Landing = () => {
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
                                 <Typography variant="body2" color="text.secondary">Date: {classItem.date}</Typography>
                                 <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Users: {classItem.currentUsers}/{classItem.size}
+                                </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant="contained" onClick={() => handleOpen(classItem)}>Open modal</Button>
+                                <Button variant="contained" onClick={() => handleOpen(classItem)} disabled={classItem.currentUsers >= classItem.size}>
+                                    {classItem.currentUsers >= classItem.size ? 'Class Full' : 'Sign Up'}
+                                </Button>
                             </CardActions>
                         </Card>
                     </Grid>

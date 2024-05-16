@@ -49,7 +49,6 @@ function Admin() {
         Sunday: false,
     });
     const [frequency, setFrequency] = useState('none');
-    const [csvData, setCsvData] = useState([]);
 
     const handleDayChange = (day) => {
         setDays((prev) => ({ ...prev, [day]: !prev[day] }));
