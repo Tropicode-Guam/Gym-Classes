@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
-    FormGroup, FormControl, InputLabel, Typography, Container, Box
+    FormGroup, FormControl, InputLabel, Typography, Container, Box,
+    CircularProgress
 } from '@mui/material';
 import ClassList from './ClassList';
 
@@ -32,6 +33,8 @@ function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loggedIn, setLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [authKey, setAuthKey] = useState('');
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -70,7 +73,9 @@ function Admin() {
             });
 
             if (response.ok) {
+                const data = await response.json();
                 setLoggedIn(true);
+                setAuthKey(data); // Store the hash as the key
                 setUsername('');
                 setPassword('');
             } else {
@@ -82,20 +87,10 @@ function Admin() {
     };
 
     const handleNewClass = async (event) => {
-        if (frequency !== 'weekly') {
-            setDays({
-                Monday: false,
-                Tuesday: false,
-                Wednesday: false,
-                Thursday: false,
-                Friday: false,
-                Saturday: false,
-                Sunday: false,
-            });
-        }
+        event.preventDefault();
+        setLoading(true);
 
         const daysAsNumbers = getDaysAsNumbers();
-        event.preventDefault();
 
         const formData = new FormData();
         formData.append('title', title);
@@ -104,18 +99,34 @@ function Admin() {
         formData.append('size', size);
         formData.append('image', image);
         formData.append('imageType', imageType);
-        formData.append('days', daysAsNumbers);
+        formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
+        formData.append('key', authKey); // Include the key in the request body
 
         try {
             const response = await fetch(`${API_BASE}/classes`, {
                 method: 'POST',
-                body: formData,
+                body: formData
             });
 
             if (response.ok) {
                 setTitle('');
                 setDescription('');
+                setDate('');
+                setSize('');
+                setImage(null);
+                setImageType(null);
+                setDays({
+                    Monday: false,
+                    Tuesday: false,
+                    Wednesday: false,
+                    Thursday: false,
+                    Friday: false,
+                    Saturday: false,
+                    Sunday: false,
+                });
+                setFrequency('none');
+                // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
                 setLoggedIn(false);
@@ -124,6 +135,8 @@ function Admin() {
             }
         } catch (error) {
             console.error('Request failed:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -263,7 +276,7 @@ function Admin() {
                             </FormGroup>
                         )}
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-                            Add Class
+                            {loading ? <CircularProgress size={24} /> : 'Add Class'}
                         </Button>
                     </Box>
                     <ClassList />

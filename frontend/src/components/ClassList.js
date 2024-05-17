@@ -5,6 +5,7 @@ import {
     ListItemSecondaryAction, IconButton, Paper
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { format } from 'date-fns';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -87,7 +88,7 @@ function ClassList() {
                     <ListItem key={classItem._id}>
                         <ListItemText 
                             primary={classItem.title} 
-                            secondary={`Description: ${classItem.description} | Users: ${classItem.currentUsers}/${classItem.size}`} 
+                            secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`} 
                         />
                         <ListItemSecondaryAction>
                             <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
@@ -131,7 +132,7 @@ function ClassList() {
                             {users.map((user) => (
                                 <ListItem key={user._id} divider>
                                     <ListItemText primary={`Name: ${user.name}`} secondary={`Phone: ${user.phone}`} />
-                                    <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${user.selectedDate}`} />
+                                    <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${format(new Date(user.selectedDate), "MMMM do, yyyy")}`} />
                                 </ListItem>
                             ))}
                         </List>

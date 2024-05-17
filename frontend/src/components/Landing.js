@@ -3,6 +3,7 @@ import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardC
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
+import { format } from 'date-fns';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -179,11 +180,11 @@ const Landing = () => {
                             />
                             <CardContent>
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
-                                <Typography variant="body2" color="text.secondary">Date: {classItem.date}</Typography>
-                                <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
+                                <Typography variant="body2" color="text.secondary">Date: {format(new Date(classItem.date), "MMMM do, yyyy")}</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Users: {classItem.currentUsers}/{classItem.size}
+                                    Capacity: {classItem.currentUsers}/{classItem.size}
                                 </Typography>
+                                <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
                             </CardContent>
                             <CardActions>
                                 <Button variant="contained" onClick={() => handleOpen(classItem)} disabled={classItem.currentUsers >= classItem.size}>
