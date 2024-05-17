@@ -39,7 +39,7 @@ function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loggedIn, setLoggedIn] = useState('');
-    // const [key, setKey] = useState('');
+    const [key, setKey] = useState('');
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -86,7 +86,7 @@ function Admin() {
             if (response.ok) {
                 // const data = await response.json();
                 setLoggedIn(true)
-                // setKey(data)
+                setKey(data)
                 setUsername('')
                 setPassword('')
                 // Handle login success (e.g., redirect to another page)
@@ -120,7 +120,7 @@ function Admin() {
         event.preventDefault();
 
         const formData = new FormData();
-        // formData.append('key', key)
+        formData.append('key', key)
         formData.append('title', title);
         formData.append('description', description);
         formData.append('date', date);
