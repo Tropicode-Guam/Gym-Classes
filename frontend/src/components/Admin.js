@@ -1,52 +1,47 @@
 import React, { useState } from 'react';
-// import DayPicker from './DayPicker';
-import './css.css'; // Add your custom CSS file here
-
+import {
+    Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
+    FormGroup, FormControl, InputLabel, Typography, Container, Box,
+    CircularProgress
+} from '@mui/material';
 import ClassList from './ClassList';
 
-const API_BASE = process.env.REACT_APP_API
+const API_BASE = process.env.REACT_APP_API;
 
-
-// https://medium.com/frontend-canteen/how-to-detect-file-type-using-javascript-251f67679035
 function check(headers) {
-    return async (file, options = {
-        offset: 0
-    }) => {
-        let buffers = await readBuffer(file, 0, 8)
-        buffers = new Uint8Array(buffers)
-        return headers.every((header, index) => header === buffers[options.offset + index])
+    return async (file, options = { offset: 0 }) => {
+        let buffers = await readBuffer(file, 0, 8);
+        buffers = new Uint8Array(buffers);
+        return headers.every((header, index) => header === buffers[options.offset + index]);
     };
 }
 
 function readBuffer(file, start = 0, end = 2) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => {
-            resolve(reader.result);
-        }
-            ;
+        reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsArrayBuffer(file.slice(start, end));
-    }
-    );
+    });
 }
 
 const isPNG = check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const isJPEG = check([0xff, 0xd8, 0xff]);
-const SUPPORTED_FILE_TYPES = { 'image/png': isPNG, 'image/jpeg': isJPEG }
+const SUPPORTED_FILE_TYPES = { 'image/png': isPNG, 'image/jpeg': isJPEG };
 
 function Admin() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [loggedIn, setLoggedIn] = useState('');
-    const [key, setKey] = useState('');
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [authKey, setAuthKey] = useState('');
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
     const [size, setSize] = useState('');
     const [image, setImage] = useState(null);
-    const [imageType, setImageType] = useState(null)
+    const [imageType, setImageType] = useState(null);
     const [days, setDays] = useState({
         Monday: false,
         Tuesday: false,
@@ -59,7 +54,7 @@ function Admin() {
     const [frequency, setFrequency] = useState('none');
 
     const handleDayChange = (day) => {
-        setDays(prev => ({ ...prev, [day]: !prev[day] }));
+        setDays((prev) => ({ ...prev, [day]: !prev[day] }));
     };
 
     const handleFrequencyChange = (e) => {
@@ -68,120 +63,108 @@ function Admin() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
-        // Prepare data to be sent in the request
         const credentials = { username, password };
 
         try {
-            // Send a POST request to the /login endpoint
             const response = await fetch(`${API_BASE}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials),
             });
 
-            // Check if the request was successful
             if (response.ok) {
                 const data = await response.json();
-                setLoggedIn(true)
-                setKey(data)
-                setUsername('')
-                setPassword('')
-                // Handle login success (e.g., redirect to another page)
+                setLoggedIn(true);
+                setAuthKey(data); // Store the hash as the key
+                setUsername('');
+                setPassword('');
             } else {
                 console.log('Login failed:', response.status);
-                // Handle errors (e.g., show error message)
             }
         } catch (error) {
             console.error('Request failed:', error);
-            // Handle network errors (e.g., show error message)
         }
     };
 
     const handleNewClass = async (event) => {
-
-        // before frequency is sent, the 1st 2 options should reset the selected days
-        if (frequency !== 'weekly') {
-            setDays({
-                Monday: false,
-                Tuesday: false,
-                Wednesday: false,
-                Thursday: false,
-                Friday: false,
-                Saturday: false,
-                Sunday: false,
-            });
-        }
-
-        const daysAsNumbers = getDaysAsNumbers(); // Get the array of selected day numbers
-
         event.preventDefault();
+        setLoading(true);
+
+        const daysAsNumbers = getDaysAsNumbers();
 
         const formData = new FormData();
-        formData.append('key', key)
         formData.append('title', title);
         formData.append('description', description);
         formData.append('date', date);
         formData.append('size', size);
         formData.append('image', image);
         formData.append('imageType', imageType);
-        formData.append('days', daysAsNumbers);
-        formData.append('frequency', frequency)
+        formData.append('days', JSON.stringify(daysAsNumbers));
+        formData.append('frequency', frequency);
+        formData.append('key', authKey); // Include the key in the request body
 
         try {
-            // Send a POST request with form data
             const response = await fetch(`${API_BASE}/classes`, {
                 method: 'POST',
-                body: formData,
+                body: formData
             });
 
-            // Check if the request was successful
             if (response.ok) {
-
-                setTitle('')
-                setDescription('')
-                // Handle login success (e.g., redirect to another page)
+                setTitle('');
+                setDescription('');
+                setDate('');
+                setSize('');
+                setImage(null);
+                setImageType(null);
+                setDays({
+                    Monday: false,
+                    Tuesday: false,
+                    Wednesday: false,
+                    Thursday: false,
+                    Friday: false,
+                    Saturday: false,
+                    Sunday: false,
+                });
+                setFrequency('none');
+                // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
-                setLoggedIn(false)
-                // Handle errors (e.g., show error message)
+                setLoggedIn(false);
             } else {
                 console.log('Error posting class', response.status, response.body.text);
             }
         } catch (error) {
             console.error('Request failed:', error);
-            // Handle network errors (e.g., show error message)
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
-            let file = e.target.files[0]
-            let supported = false
-            let imageType = null
+            let file = e.target.files[0];
+            let supported = false;
+            let imageType = null;
             for (let stamp of Object.keys(SUPPORTED_FILE_TYPES)) {
-                let fcheck = SUPPORTED_FILE_TYPES[stamp]
+                let fcheck = SUPPORTED_FILE_TYPES[stamp];
                 if (await fcheck(file)) {
-                    supported = true
-                    imageType = stamp
-                    break
+                    supported = true;
+                    imageType = stamp;
+                    break;
                 }
             }
             if (!supported) {
-                alert(`The only supported file types are ${Object.keys(SUPPORTED_FILE_TYPES).join(' ')}`)
-                return
+                alert(`The only supported file types are ${Object.keys(SUPPORTED_FILE_TYPES).join(' ')}`);
+                return;
             }
             setImage(file);
             setImageType(imageType);
-
         }
-    }
+    };
 
     const getDaysAsNumbers = () => {
         const dayMapping = {
-            Sunday: 0, // Assuming Sunday as the first day of the week
+            Sunday: 0,
             Monday: 1,
             Tuesday: 2,
             Wednesday: 3,
@@ -195,124 +178,146 @@ function Admin() {
             .map(([day]) => dayMapping[day]);
     };
 
-    // TODO put these in their own components
-    if (loggedIn) {
-        return (
-            <div className="admin-page">
-                <h1>Create a new class</h1>
-                <form onSubmit={handleNewClass}>
+    const fetchSignups = async () => {
+        try {
+            const response = await fetch(`${API_BASE}/signups`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch signups');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'signups.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error fetching signups:', error);
+        }
+    };
 
-                    <div>
-                        <label htmlFor="title">Title</label>
-                        <input
-                            type="text"
-                            id="title"
+    return (
+        <Container className="admin-page">
+            {loggedIn ? (
+                <>
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        Create a new class
+                    </Typography>
+                    <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
+                        <TextField
+                            label="Title"
+                            fullWidth
+                            margin="normal"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="description">Description</label>
-                        <input
-                            type="text"
-                            id="description"
+                        <TextField
+                            label="Description"
+                            fullWidth
+                            margin="normal"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="date">Date</label>
-                        <input
+                        <TextField
+                            label="Date"
                             type="datetime-local"
-                            id="date"
+                            fullWidth
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="size">Size</label>
-                        <input
-                            type="text"
-                            id="size"
+                        <TextField
+                            label="Size"
+                            fullWidth
+                            margin="normal"
                             value={size}
                             onChange={(e) => setSize(e.target.value)}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="image">Image:</label>
-                        <input
-                            type="file"
-                            id="image"
-                            onChange={handleImageChange}
-                        />
-                    </div>
-
-                    <div>
-                        <h2>Repeat Frequency</h2>
-                        <div>
-                            <select value={frequency} onChange={handleFrequencyChange}>
-                                <option value="none">None</option>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="bi-weekly">Bi-Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* when frequency is none or daily, DONT show the select days div */}
-
-                    {(frequency === 'weekly') &&
-                        <div>
-                            <h2>Select Days</h2>
-                            {Object.keys(days).map((day) => (
-                                <div key={day}>
-                                    <input
-                                        type="checkbox"
-                                        id={day}
-                                        checked={days[day]}
-                                        onChange={() => handleDayChange(day)}
+                        <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
+                            Upload Image
+                            <input type="file" hidden onChange={handleImageChange} />
+                        </Button>
+                        <Typography variant="h6" component="h2">
+                            Repeat Frequency
+                        </Typography>
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel id="frequency-label">Frequency</InputLabel>
+                            <Select
+                                labelId="frequency-label"
+                                value={frequency}
+                                onChange={handleFrequencyChange}
+                            >
+                                <MenuItem value="none">None</MenuItem>
+                                <MenuItem value="daily">Daily</MenuItem>
+                                <MenuItem value="weekly">Weekly</MenuItem>
+                                <MenuItem value="bi-weekly">Bi-Weekly</MenuItem>
+                                <MenuItem value="monthly">Monthly</MenuItem>
+                            </Select>
+                        </FormControl>
+                        {frequency === 'weekly' && (
+                            <FormGroup>
+                                <Typography variant="h6" component="h2">
+                                    Select Days
+                                </Typography>
+                                {Object.keys(days).map((day) => (
+                                    <FormControlLabel
+                                        key={day}
+                                        control={
+                                            <Checkbox
+                                                checked={days[day]}
+                                                onChange={() => handleDayChange(day)}
+                                            />
+                                        }
+                                        label={day}
                                     />
-                                    <label htmlFor={day}>{day}</label>
-                                </div>
-                            ))}
-                        </div>
-                    }
-                    <button type="submit">Add Class</button>
-                </form>
-
-                <ClassList />
-                
-            </div>
-        )
-    } else {
-        return (
-            <div className="lock-screen">
-                <h1>Hilton Gym Panel</h1>
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="username">Username:</label>
-                        <input
-                            type="text"
-                            id="username"
+                                ))}
+                            </FormGroup>
+                        )}
+                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+                            {loading ? <CircularProgress size={24} /> : 'Add Class'}
+                        </Button>
+                    </Box>
+                    <ClassList />
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        sx={{ mt: 3 }}
+                        onClick={fetchSignups}
+                    >
+                        Export Signups to CSV
+                    </Button>
+                </>
+            ) : (
+                <Container className="lock-screen">
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        Hilton Gym Panel
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+                        <TextField
+                            label="Username"
+                            fullWidth
+                            margin="normal"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                    </div>
-                    <div>
-                        <label htmlFor="password">Password:</label>
-                        <input
+                        <TextField
+                            label="Password"
                             type="password"
-                            id="password"
+                            fullWidth
+                            margin="normal"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                    </div>
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        );
-    }
+                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+                            Login
+                        </Button>
+                    </Box>
+                </Container>
+            )}
+        </Container>
+    );
 }
 
 export default Admin;
