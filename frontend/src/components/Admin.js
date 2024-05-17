@@ -84,7 +84,7 @@ function Admin() {
 
             // Check if the request was successful
             if (response.ok) {
-                // const data = await response.json();
+                const data = await response.json();
                 setLoggedIn(true)
                 setKey(data)
                 setUsername('')
