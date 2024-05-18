@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
-    ListItemSecondaryAction, IconButton, Paper
+    ListItemSecondaryAction, IconButton, Paper, CircularProgress
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
@@ -11,6 +11,7 @@ const API_BASE = process.env.REACT_APP_API;
 
 function ClassList() {
     const [classes, setClasses] = useState([]);
+    const [loading, setLoading] = useState(true);  // Initialize loading to true
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
@@ -82,6 +83,7 @@ function ClassList() {
             } catch (error) {
                 console.error('Error fetching classes:', error);
             }
+            setLoading(false)
         };
         fetchData();
     }, []);
@@ -89,22 +91,34 @@ function ClassList() {
     return (
         <div>
             <Typography variant="h4" gutterBottom>Class List</Typography>
-            <List>
-                {classes.map((classItem) => (
-                    <ListItem key={classItem._id}>
-                        <ListItemText
-                            primary={classItem.title}
-                            secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
-                        />
-                        <ListItemSecondaryAction>
-                            <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
-                            <IconButton onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
-                                <DeleteIcon />
-                            </IconButton>
-                        </ListItemSecondaryAction>
-                    </ListItem>
-                ))}
-            </List>
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <>
+                    {classes.length > 0 ? (
+                        <List>
+                            {classes.map((classItem) => (
+                                <ListItem key={classItem._id}>
+                                    <ListItemText
+                                        primary={classItem.title}
+                                        secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
+                                    />
+                                    <ListItemSecondaryAction>
+                                        <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
+                                        <IconButton onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            ))}
+                        </List>
+                    ) : (
+                        <Typography variant="h6" gutterBottom>No classes available</Typography>
+                    )}
+                </>
+            )}
             <Modal
                 open={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}

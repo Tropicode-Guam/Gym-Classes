@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress} from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
@@ -19,6 +19,7 @@ const Landing = () => {
         selectedDate: '',
         selectedClass: ''
     });
+    const [loading, setLoading] = useState(true)
     const { enqueueSnackbar } = useSnackbar();
 
     const handleOpen = (classItem) => {
@@ -157,13 +158,17 @@ const Landing = () => {
     };
 
     useEffect(() => {
-        fetchClasses();
+        fetchClasses().then(() => {
+            setLoading(false)
+        })
     }, []);
 
     return (
         <Container>
             <Typography variant="h2" gutterBottom>Classes</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
+            {loading && <CircularProgress/>}
+            {!loading && classes.length == 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
             <Grid container spacing={4}>
                 {classes.map((classItem) => (
                     <Grid item xs={12} sm={6} md={4} key={classItem._id}>
