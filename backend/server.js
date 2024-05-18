@@ -83,6 +83,37 @@ router.get('/classes/:classId/users', async (req, res) => {
   }
 });
 
+// Define the GET endpoint for fetching users signed up for a class
+router.get('/classes/:classId/users/date/:date', async (req, res) => {
+  try {
+    const { classId, date } = req.params;
+    const classObj = await Class.findById(classId);
+
+    if (!classObj) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    const targetDate = new Date(date);
+    if (isNaN(targetDate)) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    const signups = await SignUp.find({ 
+      selectedClass: classId,
+      selectedDate: {
+        $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(targetDate.setHours(23, 59, 59, 999)),
+      }
+    });
+
+    res.json(signups);
+  } catch (error) {
+    console.error('Error fetching users for class on specific date:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+
 // Define the DELETE endpoint for deleting a class
 router.delete('/classes/:classId', async (req, res) => {
   try {
