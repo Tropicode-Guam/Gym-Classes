@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress} from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
@@ -19,8 +19,8 @@ const Landing = () => {
         selectedDate: '',
         selectedClass: ''
     });
-    const [loading, setLoading] = useState(true)
-    const [numParticipants, setNumParticipants] = useState('...')
+    const [loading, setLoading] = useState(true);
+    const [numParticipants, setNumParticipants] = useState('...');
     const { enqueueSnackbar } = useSnackbar();
 
     const classFull = numParticipants >= (selectedClassItem && selectedClassItem.size || 0)
@@ -129,22 +129,28 @@ const Landing = () => {
         const start = new Date(date);
         const current = new Date(d);
 
+        // Remove time component for accurate date comparison
+        start.setHours(0, 0, 0, 0);
+        current.setHours(0, 0, 0, 0);
+
+        // Ensure the current date is at least the start date
         if (current < start) {
             return false;
         }
 
-        const diffTime = Math.abs(current - start);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Calculate the difference in days between the current date and the start date
+        const diffTime = current - start;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         switch (frequency) {
             case 'none':
-                return false;
+                return current.getTime() === start.getTime();
             case 'daily':
                 return true;
             case 'weekly':
                 return days.includes(current.getDay());
             case 'bi-weekly':
-                return diffDays % 14 < 7 && days.includes(current.getDay());
+                return (diffDays % 14) < 7 && days.includes(current.getDay());
             case 'monthly':
                 return start.getDate() === current.getDate();
             default:
@@ -152,18 +158,19 @@ const Landing = () => {
         }
     };
 
+
     useEffect(() => {
         fetchClasses().then(() => {
-            setLoading(false)
-        })
+            setLoading(false);
+        });
     }, []);
 
     return (
         <Container>
             <Typography variant="h2" gutterBottom>Classes</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
-            {loading && <CircularProgress/>}
-            {!loading && classes.length == 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
+            {loading && <CircularProgress />}
+            {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
             <Grid container spacing={4}>
                 {classes.map((classItem) => (
                     <Grid item xs={12} sm={6} md={4} key={classItem._id}>
