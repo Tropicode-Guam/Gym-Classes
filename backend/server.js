@@ -31,7 +31,7 @@ const isThisAClassDay = (d, classItem) => {
   }
 
   const diffTime = current - start;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   switch (frequency) {
       case 'none':
