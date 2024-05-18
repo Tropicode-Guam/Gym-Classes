@@ -20,7 +20,10 @@ const Landing = () => {
         selectedClass: ''
     });
     const [loading, setLoading] = useState(true);
+    const [numParticipants, setNumParticipants] = useState('...');
     const { enqueueSnackbar } = useSnackbar();
+
+    const classFull = numParticipants >= (selectedClassItem && selectedClassItem.size || 0)
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
@@ -64,18 +67,17 @@ const Landing = () => {
             }
             const classData = await response.json();
 
-            // Fetch user count for each class
-            const classesWithUserCount = await Promise.all(classData.map(async (classItem) => {
-                const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users`);
-                const users = await userResponse.json();
-                return { ...classItem, currentUsers: users.length };
-            }));
-
-            setClasses(classesWithUserCount);
+            setClasses(classData);
         } catch (error) {
             setError(`Error fetching classes: ${error.message}`);
         }
     };
+
+    const fetchUserCount = async (classItem, date) => {
+        const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users/date/${date}`)
+        const users = await userResponse.json();
+        setNumParticipants(users.length)
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -97,14 +99,6 @@ const Landing = () => {
                 throw new Error('Failed to sign up');
             }
 
-            // Update the user count for the class
-            const updatedClasses = classes.map(classItem =>
-                classItem._id === selectedClassItem._id
-                    ? { ...classItem, currentUsers: classItem.currentUsers + 1 }
-                    : classItem
-            );
-            setClasses(updatedClasses);
-
             // Close modal and show success notification
             handleClose();
             enqueueSnackbar('Signed up successfully!', { variant: 'success' });
@@ -123,6 +117,7 @@ const Landing = () => {
     };
 
     const handleDateChange = (date) => {
+        fetchUserCount(selectedClassItem, date)
         setFormData({
             ...formData,
             selectedDate: date || ''
@@ -194,13 +189,13 @@ const Landing = () => {
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
                                 <Typography variant="body2" color="text.secondary">Date: {format(new Date(classItem.date), "MMMM do, yyyy")}</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Capacity: {classItem.currentUsers}/{classItem.size}
+                                    Capacity: {classItem.size}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant="contained" onClick={() => handleOpen(classItem)} disabled={classItem.currentUsers >= classItem.size}>
-                                    {classItem.currentUsers >= classItem.size ? 'Class Full' : 'Sign Up'}
+                                <Button variant="contained" onClick={() => handleOpen(classItem)}>
+                                    Sign Up
                                 </Button>
                             </CardActions>
                         </Card>
@@ -220,8 +215,11 @@ const Landing = () => {
                             tileDisabled={({ date }) => !isThisAClassDay(date, selectedClassItem)}
                             onChange={handleDateChange}
                         />
+                        {classFull && <Typography id="modal-modal-title" variant="h6" component="h2">Class full</Typography>}
+                        {numParticipants}/{selectedClassItem.size} Participants
                         <form onSubmit={handleSubmit}>
                             <TextField
+                                disabled={classFull}
                                 label="Name"
                                 id="name"
                                 name="name"
@@ -232,6 +230,7 @@ const Landing = () => {
                                 margin="normal"
                             />
                             <TextField
+                                disabled={classFull}
                                 label="Phone Number"
                                 id="phone"
                                 name="phone"
@@ -243,6 +242,7 @@ const Landing = () => {
                                 margin="normal"
                             />
                             <TextField
+                                disabled={classFull}
                                 label="Insurance"
                                 id="insurance"
                                 name="insurance"
@@ -254,7 +254,7 @@ const Landing = () => {
                             />
                             <input type="hidden" name="selectedDate" value={formData.selectedDate} />
                             <input type="hidden" name="selectedClass" value={formData.selectedClass} />
-                            <Button type="submit" variant="contained" color="primary">Submit</Button>
+                            <Button type="submit" variant="contained" color="primary" disabled={classFull}>Submit</Button>
                         </form>
                     </Box>
                 </Modal>

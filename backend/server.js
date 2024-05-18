@@ -18,6 +18,34 @@ const SignUp = require('./models/SignUp');
 // Load environment variables
 require('dotenv').config();
 
+const isThisAClassDay = (d, classItem) => {
+  const { date, frequency, days } = classItem;
+  const start = new Date(date);
+  const current = new Date(d);
+
+  if (current < start) {
+      return false;
+  }
+
+  const diffTime = Math.abs(current - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  switch (frequency) {
+      case 'none':
+          return false;
+      case 'daily':
+          return true;
+      case 'weekly':
+          return days.includes(current.getDay());
+      case 'bi-weekly':
+          return diffDays % 14 < 7 && days.includes(current.getDay());
+      case 'monthly':
+          return start.getDate() === current.getDate();
+      default:
+          return false;
+  }
+};
+
 // Retrieve DB_URL from environment variables
 function generate_db_url(username, password) {
   return `mongodb://${username}:${password}@${process.env.DB_HOST}/${process.env.DB_NAME}`;
@@ -83,6 +111,39 @@ router.get('/classes/:classId/users', async (req, res) => {
   }
 });
 
+// Define the GET endpoint for fetching users signed up for a class
+router.get('/classes/:classId/users/date/:date', async (req, res) => {
+  try {
+    const { classId, date } = req.params;
+    const classObj = await Class.findById(classId);
+
+    if (!classObj) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    const targetDate = new Date(date);
+    if (isNaN(targetDate)) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    // don't need to check if target date is a class date since class may have been edited
+
+    const signups = await SignUp.find({ 
+      selectedClass: classId,
+      selectedDate: {
+        $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(targetDate.setHours(23, 59, 59, 999)),
+      }
+    });
+
+    res.json(signups);
+  } catch (error) {
+    console.error('Error fetching users for class on specific date:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+
 // Define the DELETE endpoint for deleting a class
 router.delete('/classes/:classId', async (req, res) => {
   try {
@@ -145,6 +206,34 @@ const upload = multer({
 router.post('/signup', async (req, res) => {
   try {
     const { name, phone, insurance, selectedDate, selectedClass } = req.body;
+    const classObj = await Class.findById(selectedClass);
+
+    // check class and date to ensure they're valid
+    if (!classObj) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+
+    const targetDate = new Date(selectedDate);
+    if (isNaN(targetDate)) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    if (!isThisAClassDay(selectedDate, classObj)) {
+      return res.status(400).json({ error: 'Date isn\'t a class date' });
+    }
+
+    const signups = await SignUp.find({ 
+      selectedClass,
+      selectedDate: {
+        $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(targetDate.setHours(23, 59, 59, 999)),
+      }
+    });
+
+    if (signups.length >= classObj.size) {
+      return res.status(400).json({ error: 'Class is full' });
+    }
+
     const signupData = { name, phone, insurance, selectedDate, selectedClass };
     const signup = new SignUp(signupData);
     await signup.save();
