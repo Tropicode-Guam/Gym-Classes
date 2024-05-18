@@ -14,6 +14,7 @@ function ClassList() {
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const getClasses = async () => {
         try {
@@ -54,6 +55,11 @@ function ClassList() {
         }
     };
 
+    const handleClickDeleteClass = (classId) => {
+        setSelectedClass(classes.find((classItem) => classItem._id === classId))
+        setShowDeleteModal(true);
+    }
+
     const handleDeleteClass = async (classId) => {
         try {
             const response = await axios.delete(`${API_BASE}/classes/${classId}`);
@@ -86,19 +92,73 @@ function ClassList() {
             <List>
                 {classes.map((classItem) => (
                     <ListItem key={classItem._id}>
-                        <ListItemText 
-                            primary={classItem.title} 
-                            secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`} 
+                        <ListItemText
+                            primary={classItem.title}
+                            secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
                         />
                         <ListItemSecondaryAction>
                             <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
-                            <IconButton onClick={() => handleDeleteClass(classItem._id)} aria-label="delete">
+                            <IconButton onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
                                 <DeleteIcon />
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>
                 ))}
             </List>
+            <Modal
+                open={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100vh',
+                        outline: 0,
+                    }}
+                >
+                    
+    
+                    
+                    {/* gpt */}
+                    <Paper
+                        sx={{
+                            padding: 4,
+                            width: '80%',
+                            maxWidth: '600px',
+                            bgcolor: 'background.paper',
+                            boxShadow: 24,
+                            opacity: 1,
+                        }}
+                    >
+                        <Typography id="modal-title" variant="h6" gutterBottom>Are you sure you want to delete this class?</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                            {/* cancel button */}
+                            <Button
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            {/* ok button */}
+                            <Button
+                                onClick={() => {
+                                    handleDeleteClass(selectedClass._id);
+                                    setShowDeleteModal(false);
+                                }}
+                                color="error"
+                            >
+                                Delete
+                            </Button>
+                        </Box>
+                    </Paper>
+
+                    {/* gpt */}
+                </Box>
+            </Modal>
             <Modal
                 open={showModal}
                 onClose={() => setShowModal(false)}
