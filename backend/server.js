@@ -23,16 +23,19 @@ const isThisAClassDay = (d, classItem) => {
   const start = new Date(date);
   const current = new Date(d);
 
+  start.setHours(0, 0, 0, 0);
+  current.setHours(0, 0, 0, 0);
+
   if (current < start) {
       return false;
   }
 
-  const diffTime = Math.abs(current - start);
+  const diffTime = current - start;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   switch (frequency) {
       case 'none':
-          return false;
+          return current.getTime() === start.getTime();
       case 'daily':
           return true;
       case 'weekly':
