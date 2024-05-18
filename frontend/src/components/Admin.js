@@ -246,7 +246,7 @@ function Admin() {
                                 setDate(e.target.value)
                                 const old = getDOWFromDateString(date)
                                 const dow = getDOWFromDateString(e.target.value)
-                                if (old != dow) {
+                                if (old !== dow) {
                                     setDays({
                                         Sunday: false,
                                         Monday: false,
@@ -300,7 +300,7 @@ function Admin() {
                                         key={day}
                                         control={
                                             <Checkbox
-                                                disabled={dayOfWeek == day}
+                                                disabled={dayOfWeek === day}
                                                 checked={days[day]}
                                                 onChange={() => handleDayChange(day)}
                                             />
