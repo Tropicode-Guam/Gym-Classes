@@ -25,6 +25,19 @@ function readBuffer(file, start = 0, end = 2) {
     });
 }
 
+function getDOWFromDateString(ds) {
+    const DAYS_OF_WEEK_MAP = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ]
+    return DAYS_OF_WEEK_MAP[new Date(ds).getDay()]
+}
+
 const isPNG = check([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const isJPEG = check([0xff, 0xd8, 0xff]);
 const SUPPORTED_FILE_TYPES = { 'image/png': isPNG, 'image/jpeg': isJPEG };
@@ -43,15 +56,17 @@ function Admin() {
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [days, setDays] = useState({
+        Sunday: false,
         Monday: false,
         Tuesday: false,
         Wednesday: false,
         Thursday: false,
         Friday: false,
         Saturday: false,
-        Sunday: false,
     });
     const [frequency, setFrequency] = useState('none');
+
+    const dayOfWeek = getDOWFromDateString(date)
 
     const handleDayChange = (day) => {
         setDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -117,13 +132,13 @@ function Admin() {
                 setImage(null);
                 setImageType(null);
                 setDays({
+                    Sunday: false,
                     Monday: false,
                     Tuesday: false,
                     Wednesday: false,
                     Thursday: false,
                     Friday: false,
                     Saturday: false,
-                    Sunday: false,
                 });
                 setFrequency('none');
                 // Success notification or update state to show successful upload
@@ -226,7 +241,26 @@ function Admin() {
                             margin="normal"
                             InputLabelProps={{ shrink: true }}
                             value={date}
-                            onChange={(e) => setDate(e.target.value)}
+                            onChange={(e) => {
+                                
+                                setDate(e.target.value)
+                                const old = getDOWFromDateString(date)
+                                const dow = getDOWFromDateString(e.target.value)
+                                if (old != dow) {
+                                    setDays({
+                                        Sunday: false,
+                                        Monday: false,
+                                        Tuesday: false,
+                                        Wednesday: false,
+                                        Thursday: false,
+                                        Friday: false,
+                                        Saturday: false,
+
+                                        [dow]: true
+                                    });
+                                }
+
+                            }}
                         />
                         <TextField
                             label="Size"
@@ -266,6 +300,7 @@ function Admin() {
                                         key={day}
                                         control={
                                             <Checkbox
+                                                disabled={dayOfWeek == day}
                                                 checked={days[day]}
                                                 onChange={() => handleDayChange(day)}
                                             />
