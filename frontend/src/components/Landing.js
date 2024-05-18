@@ -138,14 +138,8 @@ const Landing = () => {
         start.setHours(0, 0, 0, 0);
         current.setHours(0, 0, 0, 0);
 
-        console.log(`Class Start Date: ${start}`);
-        console.log(`Current Date: ${current}`);
-        console.log(`Class Frequency: ${frequency}`);
-        console.log(`Class Days: ${days}`);
-
         // Ensure the current date is at least the start date
         if (current < start) {
-            console.log("Current date is before the start date.");
             return false;
         }
 
