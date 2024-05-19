@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
@@ -55,6 +55,7 @@ function Admin() {
     const [size, setSize] = useState('');
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
     const [days, setDays] = useState({
         Sunday: false,
         Monday: false,
@@ -212,6 +213,20 @@ function Admin() {
         }
     };
 
+    // https://stackoverflow.com/a/57781164
+    useEffect(() => {
+        if (!image) {
+            setPreviewImage(null);
+            return
+        }
+
+        const objectUrl = URL.createObjectURL(image);
+        setPreviewImage(objectUrl);
+
+        // free memory when ever this component is unmounted
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [image])
+
     return (
         <Container className="admin-page">
             {loggedIn ? (
@@ -273,6 +288,15 @@ function Admin() {
                             Upload Image
                             <input type="file" hidden onChange={handleImageChange} />
                         </Button>
+                        <Box
+                            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 2 }}
+                        >
+                            {previewImage && <img
+                                src={previewImage}
+                                alt="Preview"
+                                style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
+                            ></img>}
+                        </Box>
                         <Typography variant="h6" component="h2">
                             Repeat Frequency
                         </Typography>
