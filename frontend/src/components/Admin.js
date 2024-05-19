@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress
+    CircularProgress, Snackbar, Alert
 } from '@mui/material';
 import ClassList from './ClassList';
 
@@ -66,6 +66,8 @@ function Admin() {
         Saturday: false,
     });
     const [frequency, setFrequency] = useState('none');
+    const [errorOpen, setErrorOpen] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     const dayOfWeek = getDOWFromDateString(date)
 
@@ -105,6 +107,12 @@ function Admin() {
     const handleNewClass = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        if ([title, description, date, size, image].some(field => !field)) {
+            setErrorMsg('All fields are required');
+            setErrorOpen(true);
+            setLoading(false);
+        }
 
         const daysAsNumbers = getDaysAsNumbers();
 
@@ -337,6 +345,21 @@ function Admin() {
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
                             {loading ? <CircularProgress size={24} /> : 'Add Class'}
                         </Button>
+                        <Snackbar 
+                            open={errorOpen} 
+                            autoHideDuration={3000} 
+                            onClose={(event, reason) => {
+                                if (reason === 'clickaway') return;
+                                setErrorOpen(false)
+                            }}
+                        >
+                            <Alert 
+                                severity="error"
+                                variant="filled"
+                                onClose={() => setErrorOpen(false)}
+                                sx={{ width: '100%' }}
+                            >{errorMsg}</Alert>
+                        </Snackbar>
                     </Box>
                     <ClassList />
                     <Button
