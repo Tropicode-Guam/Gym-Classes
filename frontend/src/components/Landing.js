@@ -23,7 +23,7 @@ const Landing = () => {
     const [numParticipants, setNumParticipants] = useState('...');
     const { enqueueSnackbar } = useSnackbar();
 
-    const classFull = numParticipants >= (selectedClassItem && selectedClassItem.size || 0)
+    const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0)
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
@@ -167,7 +167,6 @@ const Landing = () => {
 
     return (
         <Container>
-            <Typography variant="h2" gutterBottom>Classes</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
