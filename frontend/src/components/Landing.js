@@ -20,13 +20,14 @@ const Landing = () => {
         selectedClass: ''
     });
     const [loading, setLoading] = useState(true);
-    const [numParticipants, setNumParticipants] = useState('...');
+    const [numParticipants, setNumParticipants] = useState(0);
     const { enqueueSnackbar } = useSnackbar();
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0)
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
+        setNumParticipants(0)
         setFormData({
             ...formData,
             selectedClass: classItem._id,
