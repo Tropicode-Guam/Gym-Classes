@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress
+    CircularProgress, Snackbar, Alert
 } from '@mui/material';
 import ClassList from './ClassList';
 
@@ -55,6 +55,7 @@ function Admin() {
     const [size, setSize] = useState('');
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
     const [days, setDays] = useState({
         Sunday: false,
         Monday: false,
@@ -65,9 +66,9 @@ function Admin() {
         Saturday: false,
     });
     const [frequency, setFrequency] = useState('none');
+
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const [imageName, setImageName] = useState('');
-
 
     const dayOfWeek = getDOWFromDateString(date)
 
@@ -107,6 +108,12 @@ function Admin() {
     const handleNewClass = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        if ([title, description, date, size, image].some(field => !field)) {
+            setErrorMsg('All fields are required');
+            setErrorOpen(true);
+            setLoading(false);
+        }
 
         const daysAsNumbers = getDaysAsNumbers();
 
@@ -219,6 +226,20 @@ function Admin() {
         }
     };
 
+    // https://stackoverflow.com/a/57781164
+    useEffect(() => {
+        if (!image) {
+            setPreviewImage(null);
+            return
+        }
+
+        const objectUrl = URL.createObjectURL(image);
+        setPreviewImage(objectUrl);
+
+        // free memory when ever this component is unmounted
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [image])
+
     return (
         <Container className="admin-page">
             {loggedIn ? (
@@ -323,6 +344,21 @@ function Admin() {
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
                             {loading ? <CircularProgress size={24} /> : 'Add Class'}
                         </Button>
+                        <Snackbar 
+                            open={errorOpen} 
+                            autoHideDuration={3000} 
+                            onClose={(event, reason) => {
+                                if (reason === 'clickaway') return;
+                                setErrorOpen(false)
+                            }}
+                        >
+                            <Alert 
+                                severity="error"
+                                variant="filled"
+                                onClose={() => setErrorOpen(false)}
+                                sx={{ width: '100%' }}
+                            >{errorMsg}</Alert>
+                        </Snackbar>
                     </Box>
                     <ClassList />
                     <Button
