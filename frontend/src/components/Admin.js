@@ -65,6 +65,9 @@ function Admin() {
         Saturday: false,
     });
     const [frequency, setFrequency] = useState('none');
+    const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+    const [imageName, setImageName] = useState('');
+
 
     const dayOfWeek = getDOWFromDateString(date)
 
@@ -131,6 +134,8 @@ function Admin() {
                 setSize('');
                 setImage(null);
                 setImageType(null);
+                setImagePreviewUrl(null); // Reset image preview URL
+                setImageName(''); // Reset image name
                 setDays({
                     Sunday: false,
                     Monday: false,
@@ -174,6 +179,8 @@ function Admin() {
             }
             setImage(file);
             setImageType(imageType);
+            setImagePreviewUrl(URL.createObjectURL(file));
+            setImageName(file.name);
         }
     };
 
@@ -216,9 +223,6 @@ function Admin() {
         <Container className="admin-page">
             {loggedIn ? (
                 <>
-                    <Typography variant="h4" component="h1" gutterBottom>
-                        Create a new class
-                    </Typography>
                     <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
                         <TextField
                             label="Title"
@@ -255,11 +259,9 @@ function Admin() {
                                         Thursday: false,
                                         Friday: false,
                                         Saturday: false,
-
                                         [dow]: true
                                     });
                                 }
-
                             }}
                         />
                         <TextField
@@ -273,6 +275,14 @@ function Admin() {
                             Upload Image
                             <input type="file" hidden onChange={handleImageChange} />
                         </Button>
+                        {imageName && (
+                            <Typography variant="body2" gutterBottom>
+                                Selected Image: {imageName}
+                            </Typography>
+                        )}
+                        {imagePreviewUrl && (
+                            <img src={imagePreviewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '20px' }} />
+                        )}
                         <Typography variant="h6" component="h2">
                             Repeat Frequency
                         </Typography>
@@ -326,9 +336,6 @@ function Admin() {
                 </>
             ) : (
                 <Container className="lock-screen">
-                    <Typography variant="h4" component="h1" gutterBottom>
-                        Hilton Gym Panel
-                    </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
                         <TextField
                             label="Username"
