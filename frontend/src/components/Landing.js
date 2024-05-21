@@ -75,6 +75,7 @@ const Landing = () => {
     };
 
     const fetchUserCount = async (classItem, date) => {
+        date = format(date, 'yyyy-MM-dd');
         const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users/date/${date}`)
         const users = await userResponse.json();
         setNumParticipants(users.length)
@@ -93,7 +94,10 @@ const Landing = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    selectedDate: format(formData.selectedDate, 'yyyy-MM-dd')
+                })
             });
 
             if (!response.ok) {
