@@ -55,7 +55,9 @@ function Admin() {
     const [size, setSize] = useState('');
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+    const [imageName, setImageName] = useState('');
+
     const [days, setDays] = useState({
         Sunday: false,
         Monday: false,
@@ -67,8 +69,9 @@ function Admin() {
     });
     const [frequency, setFrequency] = useState('none');
 
-    const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-    const [imageName, setImageName] = useState('');
+    // Define the error state variables
+    const [errorMsg, setErrorMsg] = useState('');
+    const [errorOpen, setErrorOpen] = useState(false);
 
     const dayOfWeek = getDOWFromDateString(date)
 
@@ -113,6 +116,7 @@ function Admin() {
             setErrorMsg('All fields are required');
             setErrorOpen(true);
             setLoading(false);
+            return; // Add return to prevent further execution
         }
 
         const daysAsNumbers = getDaysAsNumbers();
@@ -158,7 +162,8 @@ function Admin() {
                 console.log('Login key not authorized', response.status);
                 setLoggedIn(false);
             } else {
-                console.log('Error posting class', response.status, response.body.text);
+                const responseText = await response.text();
+                console.log('Error posting class', response.status, responseText);
             }
         } catch (error) {
             console.error('Request failed:', error);
@@ -226,17 +231,16 @@ function Admin() {
         }
     };
 
-    // https://stackoverflow.com/a/57781164
     useEffect(() => {
         if (!image) {
-            setPreviewImage(null);
+            setImagePreviewUrl(null);
             return
         }
 
         const objectUrl = URL.createObjectURL(image);
-        setPreviewImage(objectUrl);
+        setImagePreviewUrl(objectUrl);
 
-        // free memory when ever this component is unmounted
+        // Free memory when this component is unmounted
         return () => URL.revokeObjectURL(objectUrl);
     }, [image])
 
@@ -267,7 +271,7 @@ function Admin() {
                             InputLabelProps={{ shrink: true }}
                             value={date}
                             onChange={(e) => {
-                                
+
                                 setDate(e.target.value)
                                 const old = getDOWFromDateString(date)
                                 const dow = getDOWFromDateString(e.target.value)
@@ -344,15 +348,15 @@ function Admin() {
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
                             {loading ? <CircularProgress size={24} /> : 'Add Class'}
                         </Button>
-                        <Snackbar 
-                            open={errorOpen} 
-                            autoHideDuration={3000} 
+                        <Snackbar
+                            open={errorOpen}
+                            autoHideDuration={3000}
                             onClose={(event, reason) => {
                                 if (reason === 'clickaway') return;
                                 setErrorOpen(false)
                             }}
                         >
-                            <Alert 
+                            <Alert
                                 severity="error"
                                 variant="filled"
                                 onClose={() => setErrorOpen(false)}
