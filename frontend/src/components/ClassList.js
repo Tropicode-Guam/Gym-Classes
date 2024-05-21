@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
-    ListItemSecondaryAction, IconButton, Paper, CircularProgress
+    ListItemSecondaryAction, IconButton, Paper, CircularProgress, Checkbox
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
@@ -16,6 +16,7 @@ function ClassList() {
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [checkedUsers, setCheckedUsers] = useState({});
 
     const getClasses = async () => {
         try {
@@ -47,13 +48,30 @@ function ClassList() {
         try {
             const response = await axios.get(`${API_BASE}/classes/${classId}/users`);
             if (response.status === 200) {
-                setUsers(response.data);
+                const sortedUsers = response.data.sort((a, b) => new Date(a.selectedDate) - new Date(b.selectedDate));
+                setUsers(sortedUsers);
+                const initialCheckedUsers = sortedUsers.reduce((acc, user) => {
+                    acc[user._id] = false;
+                    return acc;
+                }, {});
+                setCheckedUsers(initialCheckedUsers);
             } else {
                 console.error('Failed to fetch users for class:', response.status);
             }
         } catch (error) {
             console.error('Error fetching users for class:', error);
         }
+    };
+
+    const handleCheckboxChange = (userId) => {
+        setCheckedUsers((prev) => ({
+            ...prev,
+            [userId]: !prev[userId],
+        }));
+    };
+
+    const handlePrintAttendance = () => {
+        window.print();
     };
 
     const handleClickDeleteClass = (classId) => {
@@ -133,9 +151,9 @@ function ClassList() {
                         outline: 0,
                     }}
                 >
-                    
-    
-                    
+
+
+
                     {/* gpt */}
                     <Paper
                         sx={{
@@ -149,7 +167,6 @@ function ClassList() {
                     >
                         <Typography id="modal-title" variant="h6" gutterBottom>Are you sure you want to delete this class?</Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                            {/* cancel button */}
                             <Button
                                 onClick={() => {
                                     setShowDeleteModal(false);
@@ -157,7 +174,6 @@ function ClassList() {
                             >
                                 Cancel
                             </Button>
-                            {/* ok button */}
                             <Button
                                 onClick={() => {
                                     handleDeleteClass(selectedClass._id);
@@ -169,8 +185,6 @@ function ClassList() {
                             </Button>
                         </Box>
                     </Paper>
-
-                    {/* gpt */}
                 </Box>
             </Modal>
             <Modal
@@ -207,9 +221,21 @@ function ClassList() {
                                 <ListItem key={user._id} divider>
                                     <ListItemText primary={`Name: ${user.name}`} secondary={`Phone: ${user.phone}`} />
                                     <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${format(new Date(user.selectedDate), "MMMM do, yyyy")}`} />
+                                    <ListItemSecondaryAction>
+                                        <Checkbox
+                                            edge="end"
+                                            checked={checkedUsers[user._id] || false}
+                                            onChange={() => handleCheckboxChange(user._id)}
+                                        />
+                                    </ListItemSecondaryAction>
                                 </ListItem>
                             ))}
                         </List>
+                        <Box sx={{ marginTop: 2 }}>
+                            <Button variant="contained" color="primary" onClick={handlePrintAttendance}>
+                                Print Attendance
+                            </Button>
+                        </Box>
                     </Paper>
                 </Box>
             </Modal>
