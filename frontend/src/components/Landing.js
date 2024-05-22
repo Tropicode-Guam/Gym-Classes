@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
@@ -21,9 +21,22 @@ const Landing = () => {
     });
     const [loading, setLoading] = useState(true);
     const [numParticipants, setNumParticipants] = useState(0);
-    const { enqueueSnackbar } = useSnackbar();
+
+    const [snackbarState, setSnackbarState] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
+
+    const enqueueSnackbar = function (msg, { variant = 'success' }) {
+        setSnackbarState({
+            open: true,
+            message: msg,
+            severity: variant
+        })
+    }
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
@@ -262,6 +275,22 @@ const Landing = () => {
                     </Box>
                 </Modal>
             )}
+            <Snackbar
+                open={snackbarState.open}
+                autoHideDuration={3000}
+                onClose={(event, reason) => {
+                    if (reason === 'clickaway') return;
+                    setSnackbarState({ ...snackbarState, open: false })
+                }}
+            >
+                <Alert
+                    onClose={() => setSnackbarState({ ...snackbarState, open: false })}
+                    severity={snackbarState.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarState.message}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };
