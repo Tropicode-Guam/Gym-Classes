@@ -2,21 +2,23 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
-    ListItemSecondaryAction, IconButton, Paper, CircularProgress, Checkbox
+    ListItemSecondaryAction, IconButton, Paper, CircularProgress, Checkbox, MenuItem, Select
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const API_BASE = process.env.REACT_APP_API;
 
 function ClassList() {
     const [classes, setClasses] = useState([]);
-    const [loading, setLoading] = useState(true);  // Initialize loading to true
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [checkedUsers, setCheckedUsers] = useState({});
+    const [classDates, setClassDates] = useState([]);
+    const [selectedClassDate, setSelectedClassDate] = useState('');
 
     const getClasses = async () => {
         try {
@@ -43,23 +45,25 @@ function ClassList() {
     };
 
     const handleViewUsers = async (classId) => {
-        setSelectedClass(classes.find((classItem) => classItem._id === classId));
+        const selectedClass = classes.find((classItem) => classItem._id === classId);
+        setSelectedClass(selectedClass);
         setShowModal(true);
-        try {
-            const response = await axios.get(`${API_BASE}/classes/${classId}/users`);
-            if (response.status === 200) {
-                const sortedUsers = response.data.sort((a, b) => new Date(a.selectedDate) - new Date(b.selectedDate));
-                setUsers(sortedUsers);
-                const initialCheckedUsers = sortedUsers.reduce((acc, user) => {
-                    acc[user._id] = false;
-                    return acc;
-                }, {});
-                setCheckedUsers(initialCheckedUsers);
-            } else {
-                console.error('Failed to fetch users for class:', response.status);
-            }
-        } catch (error) {
-            console.error('Error fetching users for class:', error);
+        const response = await axios.get(`${API_BASE}/classes/${classId}/users`);
+        if (response.status === 200) {
+            const sortedUsers = response.data.sort((a, b) => new Date(a.selectedDate) - new Date(b.selectedDate));
+            setUsers(sortedUsers);
+            const initialCheckedUsers = sortedUsers.reduce((acc, user) => {
+                acc[user._id] = false;
+                return acc;
+            }, {});
+            setCheckedUsers(initialCheckedUsers);
+
+            // Extract unique dates from users
+            const uniqueDates = [...new Set(sortedUsers.map(user => user.selectedDate))];
+            setClassDates(uniqueDates);
+            setSelectedClassDate(uniqueDates[0] || '');
+        } else {
+            console.error('Failed to fetch users for class:', response.status);
         }
     };
 
@@ -71,13 +75,31 @@ function ClassList() {
     };
 
     const handlePrintAttendance = () => {
-        window.print();
+        const printContent = document.getElementById('printable-attendance').innerHTML;
+        const printWindow = window.open('', '', 'width=900,height=650');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print Attendance</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        }, 500); // Delay to ensure content is rendered
     };
-
-    const handleClickDeleteClass = (classId) => {
-        setSelectedClass(classes.find((classItem) => classItem._id === classId))
-        setShowDeleteModal(true);
-    }
 
     const handleDeleteClass = async (classId) => {
         try {
@@ -93,6 +115,11 @@ function ClassList() {
         }
     };
 
+    const handleClickDeleteClass = (classId) => {
+        setSelectedClass(classes.find((classItem) => classItem._id === classId));
+        setShowDeleteModal(true);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -101,7 +128,7 @@ function ClassList() {
             } catch (error) {
                 console.error('Error fetching classes:', error);
             }
-            setLoading(false)
+            setLoading(false);
         };
         fetchData();
     }, []);
@@ -121,7 +148,7 @@ function ClassList() {
                                 <ListItem key={classItem._id}>
                                     <ListItemText
                                         primary={classItem.title}
-                                        secondary={`Description: ${classItem.description} | Date: ${format(new Date(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
+                                        secondary={`Description: ${classItem.description} | Date: ${format(parseISO(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
                                     />
                                     <ListItemSecondaryAction>
                                         <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
@@ -140,21 +167,15 @@ function ClassList() {
             <Modal
                 open={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
-
             >
                 <Box
                     sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: 'flex', alignItems: 'center',
                         justifyContent: 'center',
                         height: '100vh',
                         outline: 0,
                     }}
                 >
-
-
-
-                    {/* gpt */}
                     <Paper
                         sx={{
                             padding: 4,
@@ -195,7 +216,7 @@ function ClassList() {
             >
                 <Box
                     sx={{
-                        display: 'flex',
+                        display: 'flex', flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         height: '100vh',
@@ -203,6 +224,7 @@ function ClassList() {
                     }}
                 >
                     <Paper
+                        className="no-print"
                         sx={{
                             padding: 4,
                             width: '80%',
@@ -214,13 +236,27 @@ function ClassList() {
                     >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Typography id="modal-title" variant="h5" gutterBottom>Users for {selectedClass && selectedClass.title}</Typography>
-                            <Button onClick={() => setShowModal(false)} variant="outlined">Close</Button>
+                            <Button onClick={() => setShowModal(false)} variant="outlined" className="no-print">Close</Button>
+                        </Box>
+                        <Box sx={{ marginBottom: 2 }}>
+                            <Typography variant="h6">Select Date</Typography>
+                            <Select
+                                value={selectedClassDate}
+                                onChange={(e) => setSelectedClassDate(e.target.value)}
+                                fullWidth
+                            >
+                                {classDates.map(date => (
+                                    <MenuItem key={date} value={date}>
+                                        {format(parseISO(date), "MMMM do, yyyy")}
+                                    </MenuItem>
+                                ))}
+                            </Select>
                         </Box>
                         <List id="modal-description">
-                            {users.map((user) => (
+                            {users.filter(user => user.selectedDate === selectedClassDate).map((user) => (
                                 <ListItem key={user._id} divider>
                                     <ListItemText primary={`Name: ${user.name}`} secondary={`Phone: ${user.phone}`} />
-                                    <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${format(new Date(user.selectedDate), "MMMM do, yyyy")}`} />
+                                    <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${format(parseISO(user.selectedDate), "MMMM do, yyyy")}`} />
                                     <ListItemSecondaryAction>
                                         <Checkbox
                                             edge="end"
@@ -232,13 +268,35 @@ function ClassList() {
                             ))}
                         </List>
                         <Box sx={{ marginTop: 2 }}>
-                            <Button variant="contained" color="primary" onClick={handlePrintAttendance}>
+                            <Button variant="contained" color="primary" onClick={handlePrintAttendance} className="no-print">
                                 Print Attendance
                             </Button>
                         </Box>
                     </Paper>
+                    <div id="printable-attendance" style={{ display: 'none' }}>
+                        <h2>Attendance for {selectedClass?.title} on {selectedClassDate && format(parseISO(selectedClassDate), "MMMM do, yyyy")}</h2>
+                        <ul>
+                            {users.filter(user => user.selectedDate === selectedClassDate).map((user) => (
+                                <li key={user._id}>
+                                    Name: {user.name}, Phone: {user.phone}, Insurance: {user.insurance}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </Box>
             </Modal>
+            <style>
+                {`
+                    @media print {
+                        .no-print {
+                            display: none;
+                        }
+                        .MuiPaper-root {
+                            box-shadow: none !important;
+                        }
+                    }
+                `}
+            </style>
         </div>
     );
 }
