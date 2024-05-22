@@ -253,7 +253,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       return res.status(401).json("forbidden");
     }
 
-    const newClass = new Class({
+    const opts = {
       title: req.body.title,
       description: req.body.description,
       startDate: req.body.startDate,
@@ -263,7 +263,13 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       imageType: req.file ? req.file.mimetype : undefined,
       days: JSON.parse(req.body.days),
       frequency: req.body.frequency,
-    });
+    }
+
+    if (new Date(opts.startDate) > new Date(opts.endDate)) {
+      return res.status(400).json({ error: 'Start date must be before end date' });
+    }
+
+    const newClass = new Class(opts);
 
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
