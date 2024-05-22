@@ -131,7 +131,8 @@ const Landing = () => {
     const isThisAClassDay = (d, classItem) => {
         const { startDate, endDate, frequency, days } = classItem;
         const start = new Date(startDate);
-        const end = new Date(endDate);
+        // Date(null) is actually Date(0) whereas Date(undefined) is Invalid Date which works out for us
+        const end = new Date(endDate || undefined);
         const current = new Date(d);
 
         start.setHours(0, 0, 0, 0);
@@ -189,7 +190,7 @@ const Landing = () => {
                             <CardContent>
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
                                 <Typography variant="body2" color="text.secondary">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
-                                <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>
+                                {classItem.endDate && <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
                                 <Typography variant="body2" color="text.secondary">
                                     Capacity: {classItem.size}
                                 </Typography>

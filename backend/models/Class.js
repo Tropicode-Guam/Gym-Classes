@@ -15,7 +15,7 @@ const classSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-        required: true
+        default: undefined
     },
     size: {
         type: Number,

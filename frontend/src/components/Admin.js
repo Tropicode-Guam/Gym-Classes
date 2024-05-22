@@ -113,14 +113,14 @@ function Admin() {
         event.preventDefault();
         setLoading(true);
 
-        if ([title, description, startDate, endDate, size, image].some(field => !field)) {
+        if ([title, description, startDate, size, image].some(field => !field)) {
             setErrorMsg('All fields are required');
             setErrorOpen(true);
             setLoading(false);
             return; // Add return to prevent further execution
         }
 
-        if (new Date(startDate) > new Date(endDate)) {
+        if (endDate && new Date(startDate) > new Date(endDate)) {
             setErrorMsg('Start date must be before end date');
             setErrorOpen(true);
             return; // Add return to prevent further execution
