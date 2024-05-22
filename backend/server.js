@@ -265,7 +265,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       frequency: req.body.frequency,
     }
 
-    if (new Date(opts.startDate) > new Date(opts.endDate)) {
+    if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
       return res.status(400).json({ error: 'Start date must be before end date' });
     }
 
