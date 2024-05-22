@@ -51,7 +51,8 @@ function Admin() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [date, setDate] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     const [size, setSize] = useState('');
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
@@ -73,7 +74,7 @@ function Admin() {
     const [errorMsg, setErrorMsg] = useState('');
     const [errorOpen, setErrorOpen] = useState(false);
 
-    const dayOfWeek = getDOWFromDateString(date)
+    const dayOfWeek = getDOWFromDateString(startDate)
 
     const handleDayChange = (day) => {
         setDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -112,7 +113,7 @@ function Admin() {
         event.preventDefault();
         setLoading(true);
 
-        if ([title, description, date, size, image].some(field => !field)) {
+        if ([title, description, startDate, endDate, size, image].some(field => !field)) {
             setErrorMsg('All fields are required');
             setErrorOpen(true);
             setLoading(false);
@@ -124,7 +125,8 @@ function Admin() {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('date', date);
+        formData.append('startDate', startDate);
+        formData.append('endDate', endDate);
         formData.append('size', size);
         formData.append('image', image);
         formData.append('imageType', imageType);
@@ -141,7 +143,8 @@ function Admin() {
             if (response.ok) {
                 setTitle('');
                 setDescription('');
-                setDate('');
+                setStartDate('');
+                setEndDate('');
                 setSize('');
                 setImage(null);
                 setImageType(null);
@@ -234,7 +237,7 @@ function Admin() {
     useEffect(() => {
         if (!image) {
             setImagePreviewUrl(null);
-            return
+            return;
         }
 
         const objectUrl = URL.createObjectURL(image);
@@ -242,7 +245,7 @@ function Admin() {
 
         // Free memory when this component is unmounted
         return () => URL.revokeObjectURL(objectUrl);
-    }, [image])
+    }, [image]);
 
     return (
         <Container className="admin-page">
@@ -264,17 +267,16 @@ function Admin() {
                             onChange={(e) => setDescription(e.target.value)}
                         />
                         <TextField
-                            label="Date"
+                            label="Start Date"
                             type="datetime-local"
                             fullWidth
                             margin="normal"
                             InputLabelProps={{ shrink: true }}
-                            value={date}
+                            value={startDate}
                             onChange={(e) => {
-
-                                setDate(e.target.value)
-                                const old = getDOWFromDateString(date)
-                                const dow = getDOWFromDateString(e.target.value)
+                                setStartDate(e.target.value);
+                                const old = getDOWFromDateString(startDate);
+                                const dow = getDOWFromDateString(e.target.value);
                                 if (old !== dow) {
                                     setDays({
                                         Sunday: false,
@@ -288,6 +290,15 @@ function Admin() {
                                     });
                                 }
                             }}
+                        />
+                        <TextField
+                            label="End Date"
+                            type="datetime-local"
+                            fullWidth
+                            margin="normal"
+                            InputLabelProps={{ shrink: true }}
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
                         />
                         <TextField
                             label="Size"
@@ -353,7 +364,7 @@ function Admin() {
                             autoHideDuration={3000}
                             onClose={(event, reason) => {
                                 if (reason === 'clickaway') return;
-                                setErrorOpen(false)
+                                setErrorOpen(false);
                             }}
                         >
                             <Alert
