@@ -86,6 +86,18 @@ function ClassList() {
                             font-family: Arial, sans-serif;
                             margin: 20px;
                         }
+                        .checkbox {
+                            display: inline-block;
+                            margin-right: 10px;
+                        }
+                        ul {
+                            list-style-type: none;
+                            padding: 0;
+                        }
+                        li {
+                            display: flex;
+                            align-items: center;
+                        }
                     </style>
                 </head>
                 <body>
@@ -278,6 +290,7 @@ function ClassList() {
                         <ul>
                             {users.filter(user => user.selectedDate === selectedClassDate).map((user) => (
                                 <li key={user._id}>
+                                    <input type="checkbox" className="checkbox" />
                                     Name: {user.name}, Phone: {user.phone}, Insurance: {user.insurance}
                                 </li>
                             ))}
