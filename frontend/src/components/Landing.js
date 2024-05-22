@@ -3,7 +3,7 @@ import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardC
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -23,11 +23,11 @@ const Landing = () => {
     const [numParticipants, setNumParticipants] = useState(0);
     const { enqueueSnackbar } = useSnackbar();
 
-    const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0)
+    const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
 
     const handleOpen = (classItem) => {
         setSelectedClassItem(classItem);
-        setNumParticipants(0)
+        setNumParticipants(0);
         setFormData({
             ...formData,
             selectedClass: classItem._id,
@@ -76,10 +76,10 @@ const Landing = () => {
 
     const fetchUserCount = async (classItem, date) => {
         date = format(date, 'yyyy-MM-dd');
-        const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users/date/${date}`)
+        const userResponse = await fetch(`${API_BASE}/classes/${classItem._id}/users/date/${date}`);
         const users = await userResponse.json();
-        setNumParticipants(users.length)
-    }
+        setNumParticipants(users.length);
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -104,7 +104,6 @@ const Landing = () => {
                 throw new Error('Failed to sign up');
             }
 
-            // Close modal and show success notification
             handleClose();
             enqueueSnackbar('Signed up successfully!', { variant: 'success' });
 
@@ -122,7 +121,7 @@ const Landing = () => {
     };
 
     const handleDateChange = (date) => {
-        fetchUserCount(selectedClassItem, date)
+        fetchUserCount(selectedClassItem, date);
         setFormData({
             ...formData,
             selectedDate: date || ''
@@ -130,20 +129,19 @@ const Landing = () => {
     };
 
     const isThisAClassDay = (d, classItem) => {
-        const { date, frequency, days } = classItem;
-        const start = new Date(date);
+        const { startDate, endDate, frequency, days } = classItem;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
         const current = new Date(d);
 
-        // Remove time component for accurate date comparison
         start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
         current.setHours(0, 0, 0, 0);
 
-        // Ensure the current date is at least the start date
-        if (current < start) {
+        if (current < start || current > end) {
             return false;
         }
 
-        // Calculate the difference in days between the current date and the start date
         const diffTime = current - start;
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -162,7 +160,6 @@ const Landing = () => {
                 return false;
         }
     };
-
 
     useEffect(() => {
         fetchClasses().then(() => {
@@ -191,7 +188,8 @@ const Landing = () => {
                             />
                             <CardContent>
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
-                                <Typography variant="body2" color="text.secondary">Date: {format(new Date(classItem.date), "MMMM do, yyyy")}</Typography>
+                                <Typography variant="body2" color="text.secondary">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
+                                <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     Capacity: {classItem.size}
                                 </Typography>

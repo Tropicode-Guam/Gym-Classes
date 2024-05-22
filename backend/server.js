@@ -27,25 +27,25 @@ const isThisAClassDay = (d, classItem) => {
   current.setHours(0, 0, 0, 0);
 
   if (current < start) {
-      return false;
+    return false;
   }
 
   const diffTime = current - start;
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   switch (frequency) {
-      case 'none':
-          return current.getTime() === start.getTime();
-      case 'daily':
-          return true;
-      case 'weekly':
-          return days.includes(current.getDay());
-      case 'bi-weekly':
-          return diffDays % 14 < 7 && days.includes(current.getDay());
-      case 'monthly':
-          return start.getDate() === current.getDate();
-      default:
-          return false;
+    case 'none':
+      return current.getTime() === start.getTime();
+    case 'daily':
+      return true;
+    case 'weekly':
+      return days.includes(current.getDay());
+    case 'bi-weekly':
+      return diffDays % 14 < 7 && days.includes(current.getDay());
+    case 'monthly':
+      return start.getDate() === current.getDate();
+    default:
+      return false;
   }
 };
 
@@ -131,7 +131,7 @@ router.get('/classes/:classId/users/date/:date', async (req, res) => {
 
     // don't need to check if target date is a class date since class may have been edited
 
-    const signups = await SignUp.find({ 
+    const signups = await SignUp.find({
       selectedClass: classId,
       selectedDate: {
         $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
@@ -225,7 +225,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Date isn\'t a class date' });
     }
 
-    const signups = await SignUp.find({ 
+    const signups = await SignUp.find({
       selectedClass,
       selectedDate: {
         $gte: new Date(targetDate.setHours(0, 0, 0, 0)),
@@ -249,29 +249,26 @@ router.post('/signup', async (req, res) => {
 
 router.post('/classes', upload.single('image'), async (req, res) => {
   try {
-    // Check if the key is valid
     if (!auth.authenticate(req.body.key)) {
       return res.status(401).json("forbidden");
     }
 
-    // Log the request body and file information for debugging
-    console.log('Request Body:', req.body);
-    console.log('Uploaded File:', req.file);
-
-    let temp = req.body;
-    let days = temp['days'] ? JSON.parse(temp['days']) : [];
-    temp['days'] = days;
-
     const newClass = new Class({
-      ...temp,
-      image: req.file.buffer, // Storing the image buffer in the Class model
-      imageType: req.file.mimetype
+      title: req.body.title,
+      description: req.body.description,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      size: req.body.size,
+      image: req.file ? req.file.buffer : undefined,
+      imageType: req.file ? req.file.mimetype : undefined,
+      days: JSON.parse(req.body.days),
+      frequency: req.body.frequency,
     });
 
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
   } catch (error) {
-    console.error('Error creating class:', error); // Log the error for debugging
+    console.error('Error creating class:', error);
     res.status(500).send(error.message);
   }
 });
