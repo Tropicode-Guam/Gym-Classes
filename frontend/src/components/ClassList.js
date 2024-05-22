@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
-    ListItemSecondaryAction, IconButton, Paper, CircularProgress, Checkbox, MenuItem, Select
+    ListItemSecondaryAction, IconButton, Paper, CircularProgress, MenuItem, Select
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format, parseISO } from 'date-fns';
@@ -16,7 +16,6 @@ function ClassList() {
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [checkedUsers, setCheckedUsers] = useState({});
     const [classDates, setClassDates] = useState([]);
     const [selectedClassDate, setSelectedClassDate] = useState('');
 
@@ -26,7 +25,6 @@ function ClassList() {
             if (response.status === 200) {
                 const classData = response.data;
 
-                // Fetch user count for each class
                 const classesWithUserCount = await Promise.all(classData.map(async (classItem) => {
                     const userResponse = await axios.get(`${API_BASE}/classes/${classItem._id}/users`);
                     const userCount = userResponse.data.length;
@@ -45,33 +43,20 @@ function ClassList() {
     };
 
     const handleViewUsers = async (classId) => {
-        const selectedClass = classes.find((classItem) => classItem._id === classId);
-        setSelectedClass(selectedClass);
+        const selectedClassItem = classes.find((classItem) => classItem._id === classId);
+        setSelectedClass(selectedClassItem);
         setShowModal(true);
         const response = await axios.get(`${API_BASE}/classes/${classId}/users`);
         if (response.status === 200) {
             const sortedUsers = response.data.sort((a, b) => new Date(a.selectedDate) - new Date(b.selectedDate));
             setUsers(sortedUsers);
-            const initialCheckedUsers = sortedUsers.reduce((acc, user) => {
-                acc[user._id] = false;
-                return acc;
-            }, {});
-            setCheckedUsers(initialCheckedUsers);
 
-            // Extract unique dates from users
             const uniqueDates = [...new Set(sortedUsers.map(user => user.selectedDate))];
             setClassDates(uniqueDates);
             setSelectedClassDate(uniqueDates[0] || '');
         } else {
             console.error('Failed to fetch users for class:', response.status);
         }
-    };
-
-    const handleCheckboxChange = (userId) => {
-        setCheckedUsers((prev) => ({
-            ...prev,
-            [userId]: !prev[userId],
-        }));
     };
 
     const handlePrintAttendance = () => {
@@ -86,17 +71,17 @@ function ClassList() {
                             font-family: Arial, sans-serif;
                             margin: 20px;
                         }
-                        .checkbox {
-                            display: inline-block;
-                            margin-right: 10px;
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
                         }
-                        ul {
-                            list-style-type: none;
-                            padding: 0;
+                        th, td {
+                            border: 1px solid black;
+                            padding: 8px;
+                            text-align: left;
                         }
-                        li {
-                            display: flex;
-                            align-items: center;
+                        th {
+                            background-color: #f2f2f2;
                         }
                     </style>
                 </head>
@@ -110,7 +95,7 @@ function ClassList() {
             printWindow.focus();
             printWindow.print();
             printWindow.close();
-        }, 500); // Delay to ensure content is rendered
+        }, 500);
     };
 
     const handleDeleteClass = async (classId) => {
@@ -160,7 +145,6 @@ function ClassList() {
                                 <ListItem key={classItem._id}>
                                     <ListItemText
                                         primary={classItem.title}
-                                        secondary={`Description: ${classItem.description} | Date: ${format(parseISO(classItem.date), "MMMM do, yyyy")} | Users: ${classItem.currentUsers}/${classItem.size}`}
                                     />
                                     <ListItemSecondaryAction>
                                         <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
@@ -269,13 +253,6 @@ function ClassList() {
                                 <ListItem key={user._id} divider>
                                     <ListItemText primary={`Name: ${user.name}`} secondary={`Phone: ${user.phone}`} />
                                     <ListItemText primary={`Insurance: ${user.insurance}`} secondary={`Selected Date: ${format(parseISO(user.selectedDate), "MMMM do, yyyy")}`} />
-                                    <ListItemSecondaryAction>
-                                        <Checkbox
-                                            edge="end"
-                                            checked={checkedUsers[user._id] || false}
-                                            onChange={() => handleCheckboxChange(user._id)}
-                                        />
-                                    </ListItemSecondaryAction>
                                 </ListItem>
                             ))}
                         </List>
@@ -287,14 +264,26 @@ function ClassList() {
                     </Paper>
                     <div id="printable-attendance" style={{ display: 'none' }}>
                         <h2>Attendance for {selectedClass?.title} on {selectedClassDate && format(parseISO(selectedClassDate), "MMMM do, yyyy")}</h2>
-                        <ul>
-                            {users.filter(user => user.selectedDate === selectedClassDate).map((user) => (
-                                <li key={user._id}>
-                                    <input type="checkbox" className="checkbox" />
-                                    Name: {user.name}, Phone: {user.phone}, Insurance: {user.insurance}
-                                </li>
-                            ))}
-                        </ul>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Insurance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.filter(user => user.selectedDate === selectedClassDate).map((user) => (
+                                    <tr key={user._id}>
+                                        <td></td>
+                                        <td>{user.name}</td>
+                                        <td>{user.phone}</td>
+                                        <td>{user.insurance}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </Box>
             </Modal>
