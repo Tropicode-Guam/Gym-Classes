@@ -74,6 +74,8 @@ function Admin() {
     const [errorMsg, setErrorMsg] = useState('');
     const [errorOpen, setErrorOpen] = useState(false);
 
+    const [renderKey, setRenderKey] = useState(0);
+
     const dayOfWeek = getDOWFromDateString(startDate)
 
     const handleDayChange = (day) => {
@@ -178,6 +180,7 @@ function Admin() {
             console.error('Request failed:', error);
         } finally {
             setLoading(false);
+            setRenderKey(renderKey + 1);
         }
     };
 
@@ -381,7 +384,11 @@ function Admin() {
                             >{errorMsg}</Alert>
                         </Snackbar>
                     </Box>
-                    <ClassList />
+                    <ClassList 
+                        // rerenders the whole component
+                        // but lazy to pull state up to this level
+                        key={renderKey}
+                    />
                     <Button
                         variant="contained"
                         color="secondary"
