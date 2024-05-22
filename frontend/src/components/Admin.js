@@ -310,7 +310,7 @@ function Admin() {
                             onChange={(e) => setEndDate(e.target.value)}
                         />
                         <TextField
-                            label="Size"
+                            label="Max Class Size"
                             fullWidth
                             margin="normal"
                             value={size}
@@ -338,10 +338,10 @@ function Admin() {
                                 value={frequency}
                                 onChange={handleFrequencyChange}
                             >
-                                <MenuItem value="none">None</MenuItem>
+                                <MenuItem value="none">Single Day Class</MenuItem>
                                 <MenuItem value="daily">Daily</MenuItem>
                                 <MenuItem value="weekly">Weekly</MenuItem>
-                                <MenuItem value="bi-weekly">Bi-Weekly</MenuItem>
+                                <MenuItem value="bi-weekly">Every Other Week</MenuItem>
                                 <MenuItem value="monthly">Monthly</MenuItem>
                             </Select>
                         </FormControl>

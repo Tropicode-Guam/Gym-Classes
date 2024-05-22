@@ -192,7 +192,7 @@ const Landing = () => {
                                 <Typography variant="body2" color="text.secondary">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
                                 {classItem.endDate && <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
                                 <Typography variant="body2" color="text.secondary">
-                                    Capacity: {classItem.size}
+                                    Class Size: {classItem.size}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
                             </CardContent>
