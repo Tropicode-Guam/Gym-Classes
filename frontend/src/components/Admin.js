@@ -120,6 +120,12 @@ function Admin() {
             return; // Add return to prevent further execution
         }
 
+        if (new Date(startDate) > new Date(endDate)) {
+            setErrorMsg('Start date must be before end date');
+            setErrorOpen(true);
+            return; // Add return to prevent further execution
+        }
+
         const daysAsNumbers = getDaysAsNumbers();
 
         const formData = new FormData();
