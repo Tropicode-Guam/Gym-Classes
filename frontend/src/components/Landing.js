@@ -107,6 +107,11 @@ const Landing = () => {
                 return;
             }
 
+            if (!formData.selectedDate) {
+                enqueueSnackbar('Please select a date', { variant: 'error' });
+                return;
+            }
+
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
                 headers: {
