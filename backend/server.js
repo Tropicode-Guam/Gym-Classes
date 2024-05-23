@@ -19,8 +19,8 @@ const SignUp = require('./models/SignUp');
 require('dotenv').config();
 
 const isThisAClassDay = (d, classItem) => {
-  const { date, frequency, days } = classItem;
-  const start = new Date(date);
+  const { startDate, frequency, days } = classItem;
+  const start = new Date(startDate);
   const current = new Date(d);
 
   start.setHours(0, 0, 0, 0);
@@ -263,6 +263,14 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       imageType: req.file ? req.file.mimetype : undefined,
       days: JSON.parse(req.body.days),
       frequency: req.body.frequency,
+    }
+
+    if (!isThisAClassDay(new Date(opts.startDate), opts)) {
+      return res.status(400).json({ error: 'Start date isn\'t a class date' });
+    }
+
+    if (opts.endDate && !isThisAClassDay(new Date(opts.endDate), opts)) {
+      return res.status(400).json({ error: 'End date isn\'t a class date' });
     }
 
     if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
