@@ -4,6 +4,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
 import { format, parseISO } from 'date-fns';
+import { tzAgnosticDate } from '../utils';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -68,6 +69,10 @@ const Landing = () => {
             }
             const classData = await response.json();
 
+            classData.forEach(classItem => {
+                classItem.startDate = tzAgnosticDate(classItem.startDate).toISOString();
+                classItem.endDate = classItem.endDate && tzAgnosticDate(classItem.endDate).toISOString();
+            });
             setClasses(classData);
         } catch (error) {
             setError(`Error fetching classes: ${error.message}`);
