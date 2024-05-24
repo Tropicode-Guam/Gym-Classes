@@ -300,15 +300,27 @@ app.use((err, req, res, next) => {
 
 router.get('/signups', async (req, res) => {
   try {
-    const signups = await SignUp.find({});
+    const classes = await Class.find({});
+    classesMap = {}
+    classes.forEach(classItem => {
+      classesMap[classItem._id] = classItem;
+    });
+
+    let all = req.query.all || req.query.all === ''
+    let filter = all ? {} : {
+      selectedClass: {
+        $in: Object.keys(classesMap)
+      }
+    }
+    const signups = await SignUp.find(filter).sort({ selectedDate: -1 });
     const csvData = [
       ['Name', 'Phone', 'Insurance', 'Selected Date', 'Selected Class'],
       ...signups.map(signup => [
         signup.name,
         signup.phone,
         signup.insurance,
-        signup.selectedDate,
-        signup.selectedClass
+        signup.selectedDate.toLocaleDateString(),
+        classesMap[signup.selectedClass] && classesMap[signup.selectedClass].title || 'Deleted Class'
       ])
     ];
     res.csv(csvData);
