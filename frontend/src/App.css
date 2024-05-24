@@ -5,11 +5,11 @@
 	background-attachment: fixed;
 
 	/* Make the app fill the entire viewport */
-	width: 100vw; /* viewport width */
-	height: 100vh; /* viewport height */
-	margin: 0; /* Remove default margin */
-	overflow: auto; /* Adds scroll to the app if the content overflows */
-} 
+	width: 100vw;
+	height: 100vh;
+	margin: 0 auto;
+	overflow: auto;
+}
 
 .App-logo {
 	height: 40vmin;
@@ -36,23 +36,24 @@
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}
 }
 
 .classes-container {
-    margin-left: 0;
+	margin-left: 0;
 }
 
 .classes-list {
-    list-style: none;
-    padding: 0;
+	list-style: none;
+	padding: 0;
 }
 
 .class-image {
-    width: 200px;
-    height: 150px;
-    object-fit: cover;
-    margin-bottom: 10px;
+	width: 200px;
+	height: 150px;
+	object-fit: cover;
+	margin-bottom: 10px;
 }

@@ -257,7 +257,7 @@ function Admin() {
     }, [image]);
 
     return (
-        <Container className="admin-page">
+        <Container className="admin-page" sx={{ marginTop: 4 }}>
             {loggedIn ? (
                 <>
                     <Typography component="h1" variant="h4">
