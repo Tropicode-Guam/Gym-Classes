@@ -153,6 +153,7 @@ function Admin() {
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
+        formData.append('color', color);
         formData.append('key', authKey); // Include the key in the request body
 
         try {
