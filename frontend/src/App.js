@@ -24,7 +24,23 @@ COLOR_PALETTE.forEach((color, index) => {
     name: `${index}`
   })
 })
-theme = createTheme({palette})
+theme = createTheme({
+  palette,
+  typography: {
+    h1: {
+      fontWeight: 'bold'
+    },
+    h2: {
+      fontWeight: 'bold'
+    },
+    h3: {
+      fontWeight: 'bold'
+    },
+    h4: {
+      fontWeight: 'bold'
+    },
+  }
+})
 
 function App() {
   return (
