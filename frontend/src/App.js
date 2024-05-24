@@ -4,14 +4,7 @@ import './App.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Landing from './components/Landing';
 import Admin from './components/Admin';
-
-const COLOR_PALETTE = [
-  "#001D3D",
-  "#DD7373",
-  "#CCA000",
-  "#61988E",
-  "#EBEBEB"
-]
+import COLOR_PALETTE from './color_palette.json';
 
 // https://mui.com/material-ui/customization/palette/#generate-tokens-using-augmentcolor-utility
 // create theme from our color choices
