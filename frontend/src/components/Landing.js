@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { useSnackbar } from 'notistack';
 import { format, parseISO } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
 import { useTheme } from '@mui/material/styles';
@@ -196,7 +195,7 @@ const Landing = () => {
     }, []);
 
     return (
-        <Container>
+        <Container sx={{ marginTop: 4 }}>
             <Typography variant="h4" gutterBottom>Classes</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}

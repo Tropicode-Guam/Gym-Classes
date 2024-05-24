@@ -132,7 +132,7 @@ function ClassList() {
 
     return (
         <div>
-            <Typography variant="h4" gutterBottom>Class List</Typography>
+            <Typography variant="h4" gutterBottom sx={{ marginTop: 4 }}>Class List</Typography>
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <CircularProgress />
