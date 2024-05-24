@@ -5,6 +5,8 @@ import 'react-calendar/dist/Calendar.css';
 import { useSnackbar } from 'notistack';
 import { format, parseISO } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
+import { useTheme } from '@mui/material/styles';
+
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -28,6 +30,8 @@ const Landing = () => {
         message: '',
         severity: 'success'
     })
+
+    const theme = useTheme()
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
 
@@ -200,7 +204,12 @@ const Landing = () => {
             <Grid container spacing={4}>
                 {classes.map((classItem) => (
                     <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                        <Card>
+                        <Card
+                            sx={{
+                                color: theme.palette[classItem.color].contrastText,
+                                backgroundColor: theme.palette[classItem.color].main
+                            }}
+                        >
                             <CardMedia
                                 component="img"
                                 height="140"
@@ -213,15 +222,22 @@ const Landing = () => {
                             />
                             <CardContent>
                                 <Typography variant="h5" component="div">{classItem.title}</Typography>
-                                <Typography variant="body2" color="text.secondary">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
-                                {classItem.endDate && <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
+                                {classItem.endDate && <Typography variant="body2">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
+                                <Typography variant="body2">
                                     Class Size: {classItem.size}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
+                                <Typography variant="body2">{classItem.description}</Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant="contained" onClick={() => handleOpen(classItem)}>
+                                <Button 
+                                    sx={{
+                                        color: theme.palette[classItem.color].dark,
+                                        backgroundColor: theme.palette[classItem.color].light
+                                    }}
+                                    variant="contained" 
+                                    onClick={() => handleOpen(classItem)}
+                                >
                                     Sign Up
                                 </Button>
                             </CardActions>

@@ -16,7 +16,7 @@ const COLOR_PALETTE = [
 // https://mui.com/material-ui/customization/palette/#generate-tokens-using-augmentcolor-utility
 // create theme from our color choices
 // automatically creates light, dark, contrastText colors
-let palette = {}
+let palette = {tonalOffset: 0.5};
 COLOR_PALETTE.forEach((color, index) => {
   palette[`${index}`] = {main: color}
 })
