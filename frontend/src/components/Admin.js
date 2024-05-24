@@ -260,6 +260,9 @@ function Admin() {
         <Container className="admin-page">
             {loggedIn ? (
                 <>
+                    <Typography component="h1" variant="h4">
+                        Create a Class
+                    </Typography>
                     <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
                         <TextField
                             label="Title"

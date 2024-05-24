@@ -193,6 +193,7 @@ const Landing = () => {
 
     return (
         <Container>
+            <Typography variant="h4" gutterBottom>Classes</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
