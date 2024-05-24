@@ -206,7 +206,8 @@ const Landing = () => {
                         <Card
                             sx={{
                                 color: theme.palette[classItem.color].contrastText,
-                                backgroundColor: theme.palette[classItem.color].main
+                                backgroundColor: theme.palette[classItem.color].main,
+                                borderRadius: 3
                             }}
                         >
                             <CardMedia
