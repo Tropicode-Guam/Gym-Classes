@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress, Snackbar, Alert
+    CircularProgress, Snackbar, Alert, ButtonBase
 } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
 
 const API_BASE = process.env.REACT_APP_API;
@@ -58,6 +60,17 @@ function Admin() {
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const [imageName, setImageName] = useState('');
+
+    const [color, setColor] = useState('');
+    const theme = useTheme();
+
+    const COLOR_PALETTE = []
+    Object.entries(theme.palette).forEach(([key, value]) => {
+        // assuming our palette is just numbers
+        if (key.match(/^\d+$/)) {
+            COLOR_PALETTE.push(key)   
+        }
+    });
 
     const [days, setDays] = useState({
         Sunday: false,
@@ -168,6 +181,7 @@ function Admin() {
                     Saturday: false,
                 });
                 setFrequency('none');
+                chooseRandomColor();
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
@@ -243,6 +257,10 @@ function Admin() {
         }
     };
 
+    const chooseRandomColor = () => {
+        setColor(`${Math.floor(Math.random()*COLOR_PALETTE.length)}`);
+    }
+
     useEffect(() => {
         if (!image) {
             setImagePreviewUrl(null);
@@ -255,6 +273,10 @@ function Admin() {
         // Free memory when this component is unmounted
         return () => URL.revokeObjectURL(objectUrl);
     }, [image]);
+
+    useEffect(() => {
+        chooseRandomColor();
+    }, [])
 
     return (
         <Container className="admin-page">
@@ -368,6 +390,34 @@ function Admin() {
                                 ))}
                             </FormGroup>
                         )}
+                        <Box>
+                            {/* color preview */}
+                            <Typography 
+                                variant="h6" 
+                                component="h2"
+                                sx={{ my: 3 }}
+                            >Color</Typography>
+                            <Box>
+                                {COLOR_PALETTE.map((c, index) =>
+                                    <ButtonBase
+                                        variant="contained"
+                                        flat
+                                        color='1'
+                                        key={index}
+                                        sx={{
+                                            backgroundColor: `${index}.main`, 
+                                            width: 48,
+                                            height: 48,
+                                            border: color == index ? 2 : 0,
+                                            borderColor: color == index ? `${index}.contrastText` : null
+                                        }}
+                                        onClick={() => setColor(index)}
+                                    >
+                                        { color == index ? <CheckIcon sx={{ color: `${index}.contrastText` }} /> : null }
+                                    </ButtonBase>
+                                )}
+                            </Box>
+                        </Box>
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
                             {loading ? <CircularProgress size={24} /> : 'Add Class'}
                         </Button>
