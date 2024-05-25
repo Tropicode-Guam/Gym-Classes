@@ -12,8 +12,6 @@ export function ClassCard(props) {
     const { subThemes } = useContext(SubThemeContext);
     const cardTheme = theme.palette[classItem.color];
 
-    console.log(subThemes)
-
     return (
         <ThemeProvider theme={subThemes[classItem.color]}>
             <Card
