@@ -28,8 +28,8 @@ yarn-error.log*
 db/data
 
 # frontend
-*/settings/*
-!frontend/settings/color_palette.json
+settings/*
+!settings/color_palette.json
 
 # misc
 todo.txt
