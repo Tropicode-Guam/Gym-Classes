@@ -24,7 +24,7 @@ export function ClassCard(props) {
                 <CardMedia
                     component="img"
                     height="140"
-                    image={`${API_BASE}/images/${classItem._id}`}
+                    image={classItem.imageUrl || `${API_BASE}/images/${classItem._id}`}
                     alt={classItem.title}
                     onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
@@ -32,13 +32,13 @@ export function ClassCard(props) {
                     style={{ objectFit: 'cover' }}
                 />
                 <CardContent>
-                    <Typography variant="h5" component="div">{classItem.title}</Typography>
-                    <Typography variant="body2">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
+                    <Typography variant="h5" component="div">{classItem.title || 'TITLE'}</Typography>
+                    <Typography variant="body2">Start Date: {classItem.startDate && format(parseISO(classItem.startDate), "MMMM do, yyyy") || 'DATE'}</Typography>
                     {classItem.endDate && <Typography variant="body2">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
                     <Typography variant="body2">
-                        Class Size: {classItem.size}
+                        Class Size: {classItem.size || '#'}
                     </Typography>
-                    <Typography variant="body2">{classItem.description}</Typography>
+                    <Typography variant="body2">{classItem.description || 'DESCRIPTION'}</Typography>
                 </CardContent>
                 <CardActions>
                     {children}
