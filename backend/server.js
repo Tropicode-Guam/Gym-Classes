@@ -88,7 +88,7 @@ router.get('/', (req, res) => {
 // Define the GET endpoint for fetching classes
 router.get('/classes', async (req, res) => {
   try {
-    const classes = await Class.find({});
+    const classes = await Class.find({}).select('-image');
     res.json(classes);
   } catch (error) {
     console.error('Error fetching classes:', error);
