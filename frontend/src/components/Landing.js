@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format, parseISO } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
 import { useTheme } from '@mui/material/styles';
 import { ClassCard, ClassCardAction } from './ClassCard';
+import insurances from 'settings/insurances';
 
 
 const API_BASE = process.env.REACT_APP_API;
@@ -257,6 +258,7 @@ const Landing = () => {
                                 margin="normal"
                             />
                             <TextField
+                                select
                                 disabled={classFull}
                                 label="Insurance"
                                 id="insurance"
@@ -266,7 +268,12 @@ const Landing = () => {
                                 required
                                 fullWidth
                                 margin="normal"
-                            />
+                            >
+                                {insurances.map((insurance) => (
+                                    <MenuItem key={insurance} value={insurance}>{insurance}</MenuItem>
+                                ))}
+                                <MenuItem value="Other/None">Other/None</MenuItem>
+                            </TextField>
                             <input type="hidden" name="selectedDate" value={formData.selectedDate} />
                             <input type="hidden" name="selectedClass" value={formData.selectedClass} />
                             <Button type="submit" variant="contained" color="primary" disabled={classFull}>Submit</Button>
