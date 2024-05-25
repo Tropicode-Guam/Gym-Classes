@@ -41,6 +41,8 @@ services:
     volumes:
       - ./backend/models:/usr/src/app/models:ro
       - ./backend/server.js:/usr/src/app/server.js:ro
+      - ./backend/utils:/usr/src/app/utils:ro
+      - ./settings:/usr/src/app/settings:ro
     networks:
       - db
       - proxy-network
