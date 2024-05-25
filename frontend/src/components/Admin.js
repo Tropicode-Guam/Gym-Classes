@@ -319,6 +319,8 @@ function Admin() {
                                 <TextField
                                     label="Description"
                                     fullWidth
+                                    multiline
+                                    minRows={2}
                                     margin="normal"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
