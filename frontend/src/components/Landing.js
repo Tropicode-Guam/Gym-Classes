@@ -5,6 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 import { format, parseISO } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
 import { useTheme } from '@mui/material/styles';
+import { ClassCard, ClassCardAction } from './ClassCard';
 
 
 const API_BASE = process.env.REACT_APP_API;
@@ -203,45 +204,16 @@ const Landing = () => {
             <Grid container spacing={4}>
                 {classes.map((classItem) => (
                     <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                        <Card
-                            sx={{
-                                color: theme.palette[classItem.color].contrastText,
-                                backgroundColor: theme.palette[classItem.color].main,
-                                borderRadius: 3
-                            }}
-                        >
-                            <CardMedia
-                                component="img"
-                                height="140"
-                                image={`${API_BASE}/images/${classItem._id}`}
-                                alt={classItem.title}
-                                onError={({ currentTarget }) => {
-                                    currentTarget.onerror = null;
-                                }}
-                                style={{ objectFit: 'cover' }}
-                            />
-                            <CardContent>
-                                <Typography variant="h5" component="div">{classItem.title}</Typography>
-                                <Typography variant="body2">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
-                                {classItem.endDate && <Typography variant="body2">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
-                                <Typography variant="body2">
-                                    Class Size: {classItem.size}
-                                </Typography>
-                                <Typography variant="body2">{classItem.description}</Typography>
-                            </CardContent>
-                            <CardActions>
+                        <ClassCard classItem={classItem}>
+                            <ClassCardAction>
                                 <Button 
-                                    sx={{
-                                        color: theme.palette[classItem.color].dark,
-                                        backgroundColor: theme.palette[classItem.color].light
-                                    }}
                                     variant="contained" 
                                     onClick={() => handleOpen(classItem)}
                                 >
                                     Sign Up
                                 </Button>
-                            </CardActions>
-                        </Card>
+                            </ClassCardAction>
+                        </ClassCard>
                     </Grid>
                 ))}
             </Grid>
