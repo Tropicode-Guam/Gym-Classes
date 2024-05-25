@@ -15,6 +15,8 @@ services:
       - VIRTUAL_PORT=3000
       - NODE_ENV=development
       - API_BASE=/api
+    ports:
+      - 3000:3000
     volumes:
       - ./frontend/src:/usr/src/app/src:ro
       - ./frontend/public:/usr/src/app/public:ro
