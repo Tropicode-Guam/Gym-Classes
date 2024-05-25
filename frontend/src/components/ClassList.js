@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
-    ListItemSecondaryAction, IconButton, Paper, CircularProgress, MenuItem, Select
+    IconButton, Paper, CircularProgress, MenuItem, Select, Grid
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format, parseISO } from 'date-fns';
+import { ClassCard, ClassCardAction } from './ClassCard';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -140,21 +141,20 @@ function ClassList() {
             ) : (
                 <>
                     {classes.length > 0 ? (
-                        <List>
+                        <Grid container spacing={4}>
                             {classes.map((classItem) => (
-                                <ListItem key={classItem._id}>
-                                    <ListItemText
-                                        primary={classItem.title}
-                                    />
-                                    <ListItemSecondaryAction>
-                                        <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
-                                        <IconButton onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
+                                <Grid item xs={12} sm={6} md={4} key={classItem._id}>
+                                    <ClassCard classItem={classItem}>
+                                        <ClassCardAction>
+                                            <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
+                                            <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </ClassCardAction>
+                                    </ClassCard>
+                                </Grid>
                             ))}
-                        </List>
+                        </Grid>
                     ) : (
                         <Typography variant="h6" gutterBottom>No classes available</Typography>
                     )}
