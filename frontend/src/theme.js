@@ -1,6 +1,6 @@
 // src/theme.js
 import { createTheme } from '@mui/material/styles';
-import COLOR_PALETTE from './color_palette.json';
+import COLOR_PALETTE from 'settings/color_palette.json';
 
 // https://mui.com/material-ui/customization/palette/#generate-tokens-using-augmentcolor-utility
 // create theme from our color choices

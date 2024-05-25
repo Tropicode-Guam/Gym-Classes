@@ -27,6 +27,9 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # test dockerignore
 COPY . .
 
+# can't import from outside src folder, so putting it in node_modules instead
+RUN ln -s /usr/src/app/settings /usr/src/app/node_modules/settings
+
 # set env variable for build
 ARG HOST
 ARG API_BASE

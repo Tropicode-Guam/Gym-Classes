@@ -4,7 +4,7 @@ import './App.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Landing from './components/Landing';
 import Admin from './components/Admin';
-import COLOR_PALETTE from './color_palette.json';
+import COLOR_PALETTE from 'settings/color_palette.json';
 import theme from './theme';
 
 const SUB_THEMES = {}
