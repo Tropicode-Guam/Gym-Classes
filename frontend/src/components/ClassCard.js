@@ -1,19 +1,18 @@
 import { Card, CardActions, CardContent, CardMedia, Typography } from "@mui/material";
 import { format, parseISO } from 'date-fns';
 import { useTheme, ThemeProvider } from '@mui/material/styles';
-import React, { useContext } from 'react';
-import { SubThemeContext } from "../App";
+import React from 'react';
+import { SUB_THEMES } from "../theme";
 
 const API_BASE = process.env.REACT_APP_API;
 
 export function ClassCard(props) {
     const { classItem, children } = props;
     const theme = useTheme();
-    const { subThemes } = useContext(SubThemeContext);
     const cardTheme = theme.palette[classItem.color];
 
     return (
-        <ThemeProvider theme={subThemes[classItem.color]}>
+        <ThemeProvider theme={SUB_THEMES[classItem.color]}>
             <Card
                 sx={{
                     color: cardTheme.contrastText,

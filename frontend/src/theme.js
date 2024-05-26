@@ -48,4 +48,18 @@ theme = createTheme({
   }
 })
 
-export default theme;
+const SUB_THEMES = {}
+COLOR_PALETTE.forEach((color, index) => {
+  SUB_THEMES[`${index}`] = createTheme({
+    ...theme,
+    palette: {
+      ...theme.palette,
+      primary: {
+        ...theme.palette[`${index}`],
+        main: theme.palette[`${index}`].light,
+      }
+    }
+  })
+})
+
+export { theme, SUB_THEMES };
