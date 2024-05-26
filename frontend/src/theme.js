@@ -20,7 +20,6 @@ COLOR_PALETTE.forEach((color, index) => {
 
 let theme = createTheme({palette});
 
-palette = {}
 COLOR_PALETTE.forEach((color, index) => {
   palette[`${index}`] = theme.palette.augmentColor({
     color: {
