@@ -7,7 +7,7 @@ import { tzAgnosticDate } from '../utils';
 import { useTheme } from '@mui/material/styles';
 import { ClassCard, ClassCardAction } from './ClassCard';
 import insurances from 'settings/insurances';
-
+import general from 'settings/general';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -198,7 +198,7 @@ const Landing = () => {
 
     return (
         <Container sx={{ marginTop: 4 }}>
-            <Typography variant="h4" gutterBottom>Classes</Typography>
+            <Typography variant="h1" gutterBottom>{general.Title}</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}

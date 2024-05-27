@@ -33,7 +33,7 @@ theme = createTheme({
   typography: {
     h1: {
       fontWeight: 'bold',
-      fontSize: '2rem'
+      fontSize: '4rem'
     },
     h2: {
       fontWeight: 'bold'
