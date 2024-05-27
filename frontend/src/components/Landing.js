@@ -198,11 +198,24 @@ const Landing = () => {
 
     return (
         <Container sx={{ marginTop: 4 }}>
+            <Box
+                component="img"
+                src="hilton-logo.png"
+                alt="logo"
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    margin: '16px', // Optional: add some margin
+                    width: '100px', // Adjust the size as needed
+                    height: 'auto', // Maintain aspect ratio
+                }}
+            />
             <Typography variant="h1" gutterBottom>{general.Title}</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
-            <Container sx={{ borderLeft: '2px solid black', borderRight: '2px solid black' }}>
+            <Container sx={{ borderLeft: '1px solid black', borderRight: '1px solid black' }}>
                 <Grid container spacing={4}>
                     {classes.map((classItem) => (
                         <Grid item xs={12} sm={6} md={4} key={classItem._id}>
