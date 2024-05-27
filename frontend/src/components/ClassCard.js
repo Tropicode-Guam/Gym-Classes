@@ -17,12 +17,12 @@ export function ClassCard(props) {
                 sx={{
                     color: cardTheme.contrastText,
                     backgroundColor: cardTheme.main,
-                    borderRadius: 3
+                    borderRadius: 10
                 }}
             >
                 <CardMedia
                     component="img"
-                    height="140"
+                    height="250"
                     image={classItem.imageUrl || `${API_BASE}/images/${classItem._id}`}
                     alt={classItem.title}
                     onError={({ currentTarget }) => {
@@ -31,13 +31,14 @@ export function ClassCard(props) {
                     style={{ objectFit: 'cover' }}
                 />
                 <CardContent>
-                    <Typography variant="h5" component="div">{classItem.title || 'TITLE'}</Typography>
-                    <Typography variant="body2">Start Date: {classItem.startDate && format(parseISO(classItem.startDate), "MMMM do, yyyy") || 'DATE'}</Typography>
-                    {classItem.endDate && <Typography variant="body2">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
-                    <Typography variant="body2">
-                        Class Size: {classItem.size || '#'}
+                    <Typography variant="h5" component="div">
+                        {classItem.title || 'TITLE'} | <Typography variant="body2" display={"inline"}>
+                            {`${classItem.startDate ? format(parseISO(classItem.startDate), 'MMMM do') : 'DATE'} ${classItem.endDate ? ` - ${format(parseISO(classItem.endDate), 'MMMM do')}` : ''}`}
+                        </Typography>
                     </Typography>
-                    <Typography variant="body2">{classItem.description || 'DESCRIPTION'}</Typography>
+                    <Typography variant="body2">
+                        {classItem.description || 'DESCRIPTION'}
+                    </Typography>
                 </CardContent>
                 <CardActions>
                     {children}

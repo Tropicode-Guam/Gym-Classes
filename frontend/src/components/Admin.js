@@ -314,7 +314,7 @@ function Admin() {
                     <Typography component="h1" variant="h4">
                         Create a Class
                     </Typography>
-                    <Container sx={{ borderLeft: '1px solid black', borderRight: '1px solid black' }}>
+                    <Container>
                         <Grid
                             container
                             spacing={4}
@@ -481,7 +481,7 @@ function Admin() {
                             </Grid>
                         </Grid>
                     </Container>
-                    <Container sx={{ borderLeft: '1px solid black', borderRight: '1px solid black' }}>
+                    <Container>
                         <ClassList
                             // rerenders the whole component
                             // but lazy to pull state up to this level

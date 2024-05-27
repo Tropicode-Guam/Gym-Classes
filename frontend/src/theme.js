@@ -44,6 +44,18 @@ theme = createTheme({
     h4: {
       fontWeight: 'bold'
     },
+  },
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        maxWidthLg: {
+          maxWidth: '1440px',
+          '@media (min-width: 1200px)': {
+            maxWidth: '1440px',
+          },
+        },
+      },
+    },
   }
 })
 
