@@ -461,7 +461,9 @@ function Admin() {
                                 <Box>
                                     <ClassCard classItem={previewClassItem}>
                                         <ClassCardAction>
-                                            <Button variant="contained">Sign Up</Button>
+                                            <Button variant="contained" sx={{
+                                                borderBottomLeftRadius: 100,
+                                            }}>Sign Up</Button>
                                         </ClassCardAction>
                                     </ClassCard>
                                 </Box>

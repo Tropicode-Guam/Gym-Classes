@@ -146,7 +146,9 @@ function ClassList() {
                                 <Grid item xs={12} sm={6} md={4} key={classItem._id}>
                                     <ClassCard classItem={classItem}>
                                         <ClassCardAction>
-                                            <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
+                                            <Button variant="contained" onClick={() => handleViewUsers(classItem._id)} sx={{
+                                                borderBottomLeftRadius: 100,
+                                            }}>View Users</Button>
                                             <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
                                                 <DeleteIcon />
                                             </IconButton>
