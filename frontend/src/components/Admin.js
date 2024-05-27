@@ -173,8 +173,18 @@ function Admin() {
                 console.log('Login key not authorized', response.status);
                 setLoggedIn(false);
             } else {
-                const responseText = await response.text();
-                console.log('Error posting class', response.status, responseText);
+                // Error notification
+                try {
+                    const responseJson = await response.json();
+                    console.log('Error posting class', response.status, responseJson.error);
+                    setErrorMsg(responseJson.error);
+                    setErrorOpen(true);
+                } catch (error) {
+                    const responseText = await response.text();
+                    console.log('Error posting class', response.status, responseText);
+                    setErrorMsg(responseText);
+                    setErrorOpen(true);
+                }
             }
         } catch (error) {
             console.error('Request failed:', error);
