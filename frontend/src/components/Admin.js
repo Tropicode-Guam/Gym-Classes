@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress, Snackbar, Alert
+    CircularProgress, Snackbar, Alert, ButtonBase, Grid
 } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
+import { ClassCard, ClassCardAction } from './ClassCard';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -59,6 +62,17 @@ function Admin() {
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const [imageName, setImageName] = useState('');
 
+    const [color, setColor] = useState('');
+    const theme = useTheme();
+
+    const COLOR_PALETTE = []
+    Object.entries(theme.palette).forEach(([key, value]) => {
+        // assuming our palette is just numbers
+        if (key.match(/^\d+$/)) {
+            COLOR_PALETTE.push(key)
+        }
+    });
+
     const [days, setDays] = useState({
         Sunday: false,
         Monday: false,
@@ -77,6 +91,20 @@ function Admin() {
     const [renderKey, setRenderKey] = useState(0);
 
     const dayOfWeek = getDOWFromDateString(startDate)
+
+    const previewClassItem = {
+        title: title,
+        description: description,
+        startDate: startDate,
+        endDate: endDate,
+        frequency: frequency,
+        days: days,
+        imageUrl: imagePreviewUrl,
+        imageType: imageType,
+        size: size,
+        color: color,
+        _id: "PREVIEW"
+    }
 
     const handleDayChange = (day) => {
         setDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -140,6 +168,7 @@ function Admin() {
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
+        formData.append('color', color);
         formData.append('key', authKey); // Include the key in the request body
 
         try {
@@ -168,6 +197,7 @@ function Admin() {
                     Saturday: false,
                 });
                 setFrequency('none');
+                chooseRandomColor();
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
@@ -253,6 +283,10 @@ function Admin() {
         }
     };
 
+    const chooseRandomColor = () => {
+        setColor(`${Math.floor(Math.random() * COLOR_PALETTE.length)}`);
+    }
+
     useEffect(() => {
         if (!image) {
             setImagePreviewUrl(null);
@@ -266,139 +300,193 @@ function Admin() {
         return () => URL.revokeObjectURL(objectUrl);
     }, [image]);
 
+    useEffect(() => {
+        chooseRandomColor();
+    }, [])
+
     return (
-        <Container className="admin-page">
+        <Container className="admin-page" sx={{ marginTop: 4 }}>
             {loggedIn ? (
                 <>
-                    <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
-                        <TextField
-                            label="Title"
-                            fullWidth
-                            margin="normal"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                        <TextField
-                            label="Description"
-                            fullWidth
-                            margin="normal"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
-                        <TextField
-                            label="Start Date"
-                            type="datetime-local"
-                            fullWidth
-                            margin="normal"
-                            InputLabelProps={{ shrink: true }}
-                            value={startDate}
-                            onChange={(e) => {
-                                setStartDate(e.target.value);
-                                const old = getDOWFromDateString(startDate);
-                                const dow = getDOWFromDateString(e.target.value);
-                                if (old !== dow) {
-                                    setDays({
-                                        Sunday: false,
-                                        Monday: false,
-                                        Tuesday: false,
-                                        Wednesday: false,
-                                        Thursday: false,
-                                        Friday: false,
-                                        Saturday: false,
-                                        [dow]: true
-                                    });
-                                }
-                            }}
-                        />
-                        <TextField
-                            label="End Date"
-                            type="datetime-local"
-                            fullWidth
-                            margin="normal"
-                            InputLabelProps={{ shrink: true }}
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                        <TextField
-                            label="Max Class Size"
-                            fullWidth
-                            margin="normal"
-                            value={size}
-                            onChange={(e) => setSize(e.target.value)}
-                        />
-                        <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
-                            Upload Image
-                            <input type="file" hidden onChange={handleImageChange} />
-                        </Button>
-                        {imageName && (
-                            <Typography variant="body2" gutterBottom>
-                                Selected Image: {imageName}
-                            </Typography>
-                        )}
-                        {imagePreviewUrl && (
-                            <img src={imagePreviewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '20px' }} />
-                        )}
-                        <Typography variant="h6" component="h2">
-                            Repeat Frequency
-                        </Typography>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel id="frequency-label">Frequency</InputLabel>
-                            <Select
-                                labelId="frequency-label"
-                                value={frequency}
-                                onChange={handleFrequencyChange}
-                            >
-                                <MenuItem value="none">Single Day Class</MenuItem>
-                                <MenuItem value="daily">Daily</MenuItem>
-                                <MenuItem value="weekly">Weekly</MenuItem>
-                                <MenuItem value="bi-weekly">Every Other Week</MenuItem>
-                                <MenuItem value="monthly">Monthly</MenuItem>
-                            </Select>
-                        </FormControl>
-                        {frequency === 'weekly' && (
-                            <FormGroup>
-                                <Typography variant="h6" component="h2">
-                                    Select Days
-                                </Typography>
-                                {Object.keys(days).map((day) => (
-                                    <FormControlLabel
-                                        key={day}
-                                        control={
-                                            <Checkbox
-                                                disabled={dayOfWeek === day}
-                                                checked={days[day]}
-                                                onChange={() => handleDayChange(day)}
-                                            />
-                                        }
-                                        label={day}
-                                    />
-                                ))}
-                            </FormGroup>
-                        )}
-                        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-                            {loading ? <CircularProgress size={24} /> : 'Add Class'}
-                        </Button>
-                        <Snackbar
-                            open={errorOpen}
-                            autoHideDuration={3000}
-                            onClose={(event, reason) => {
-                                if (reason === 'clickaway') return;
-                                setErrorOpen(false);
-                            }}
+                    <Typography component="h1" variant="h4">
+                        Create a Class
+                    </Typography>
+                    <Container>
+                        <Grid
+                            container
+                            spacing={4}
+                            alignItems="center"
+                            justifyContent="space-evenly"
                         >
-                            <Alert
-                                severity="error"
-                                variant="filled"
-                                onClose={() => setErrorOpen(false)}
-                                sx={{ width: '100%' }}
-                            >{errorMsg}</Alert>
-                        </Snackbar>
-                    </Box>
-                    <ClassList 
-                        // rerenders the whole component
-                        // but lazy to pull state up to this level
-                        key={renderKey}
-                    />
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
+                                    <TextField
+                                        label="Title"
+                                        fullWidth
+                                        margin="normal"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                    />
+                                    <TextField
+                                        label="Description"
+                                        fullWidth
+                                        multiline
+                                        minRows={2}
+                                        margin="normal"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                    <TextField
+                                        label="Start Date"
+                                        type="datetime-local"
+                                        fullWidth
+                                        margin="normal"
+                                        InputLabelProps={{ shrink: true }}
+                                        value={startDate}
+                                        onChange={(e) => {
+                                            setStartDate(e.target.value);
+                                            const old = getDOWFromDateString(startDate);
+                                            const dow = getDOWFromDateString(e.target.value);
+                                            if (old !== dow) {
+                                                setDays({
+                                                    Sunday: false,
+                                                    Monday: false,
+                                                    Tuesday: false,
+                                                    Wednesday: false,
+                                                    Thursday: false,
+                                                    Friday: false,
+                                                    Saturday: false,
+                                                    [dow]: true
+                                                });
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        label="End Date"
+                                        type="datetime-local"
+                                        fullWidth
+                                        margin="normal"
+                                        InputLabelProps={{ shrink: true }}
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                    <TextField
+                                        label="Max Class Size"
+                                        fullWidth
+                                        margin="normal"
+                                        value={size}
+                                        onChange={(e) => setSize(e.target.value)}
+                                    />
+                                    <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
+                                        Upload Image
+                                        <input type="file" hidden onChange={handleImageChange} />
+                                    </Button>
+                                    <Typography variant="h6" component="h2">
+                                        Repeat Frequency
+                                    </Typography>
+                                    <FormControl fullWidth margin="normal">
+                                        <InputLabel id="frequency-label">Frequency</InputLabel>
+                                        <Select
+                                            labelId="frequency-label"
+                                            value={frequency}
+                                            onChange={handleFrequencyChange}
+                                        >
+                                            <MenuItem value="none">Single Day Class</MenuItem>
+                                            <MenuItem value="daily">Daily</MenuItem>
+                                            <MenuItem value="weekly">Weekly</MenuItem>
+                                            <MenuItem value="bi-weekly">Every Other Week</MenuItem>
+                                            <MenuItem value="monthly">Monthly</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    {frequency === 'weekly' && (
+                                        <FormGroup>
+                                            <Typography variant="h6" component="h2">
+                                                Select Days
+                                            </Typography>
+                                            {Object.keys(days).map((day) => (
+                                                <FormControlLabel
+                                                    key={day}
+                                                    control={
+                                                        <Checkbox
+                                                            disabled={dayOfWeek === day}
+                                                            checked={days[day]}
+                                                            onChange={() => handleDayChange(day)}
+                                                        />
+                                                    }
+                                                    label={day}
+                                                />
+                                            ))}
+                                        </FormGroup>
+                                    )}
+                                    <Box>
+                                        {/* color preview */}
+                                        <Typography
+                                            variant="h6"
+                                            component="h2"
+                                            sx={{ my: 3 }}
+                                        >Color</Typography>
+                                        <Box>
+                                            {COLOR_PALETTE.map((c, index) =>
+                                                <ButtonBase
+                                                    variant="contained"
+                                                    color='1'
+                                                    key={index}
+                                                    sx={{
+                                                        backgroundColor: `${index}.main`,
+                                                        width: 48,
+                                                        height: 48,
+                                                        border: color == index ? 2 : 0,
+                                                        borderColor: color == index ? `${index}.contrastText` : null
+                                                    }}
+                                                    onClick={() => setColor(index)}
+                                                >
+                                                    {color == index ? <CheckIcon sx={{ color: `${index}.contrastText` }} /> : null}
+                                                </ButtonBase>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                    <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+                                        {loading ? <CircularProgress size={24} /> : 'Add Class'}
+                                    </Button>
+                                    <Snackbar
+                                        open={errorOpen}
+                                        autoHideDuration={3000}
+                                        onClose={(event, reason) => {
+                                            if (reason === 'clickaway') return;
+                                            setErrorOpen(false);
+                                        }}
+                                    >
+                                        <Alert
+                                            severity="error"
+                                            variant="filled"
+                                            onClose={() => setErrorOpen(false)}
+                                            sx={{ width: '100%' }}
+                                        >{errorMsg}</Alert>
+                                    </Snackbar>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}
+                                sx={{ position: 'sticky', top: '50%', transform: 'translateY(-50%)' }}
+                            >
+                                <Box>
+                                    <ClassCard classItem={previewClassItem}>
+                                        <ClassCardAction>
+                                            <Button variant="contained" sx={{
+                                                borderBottomLeftRadius: 100,
+                                            }}>Sign Up</Button>
+                                        </ClassCardAction>
+                                    </ClassCard>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Container>
+                    <Container>
+                        <ClassList
+                            // rerenders the whole component
+                            // but lazy to pull state up to this level
+                            key={renderKey}
+                        />
+                    </Container>
                     <Button
                         variant="contained"
                         color="secondary"

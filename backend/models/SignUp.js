@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const insurances = require('../settings/insurances.json');
+
+
 const signUpSchema = new mongoose.Schema({
     // 
     selectedClass: {
@@ -16,7 +19,8 @@ const signUpSchema = new mongoose.Schema({
     },
     insurance: {
         type: String,
-        required: true
+        required: true,
+        enum: [...insurances, 'Other/None']
     },
     selectedDate: {
         type: Date,

@@ -13,6 +13,8 @@ services:
       - VIRTUAL_HOST=${HOST}
       - VIRTUAL_PORT=3000
       - NODE_ENV=${ENV:-production}
+    volumes:
+      - ./settings:/usr/src/app/settings:ro
     networks:
       - proxy-network  
 
@@ -30,6 +32,8 @@ services:
       - DB_NAME=${DB_NAME:-production}
     ports:
       - 5000:5000
+    volumes:
+      - ./settings:/usr/src/app/settings:ro
     networks:
       - db
       - proxy-network

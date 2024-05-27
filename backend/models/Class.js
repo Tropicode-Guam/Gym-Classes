@@ -36,6 +36,10 @@ const classSchema = new mongoose.Schema({
     frequency: {
         type: String,
         required: true
+    },
+    color: {
+        type: String,
+        default: "0"
     }
 });
 

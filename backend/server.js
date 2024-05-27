@@ -262,6 +262,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       image: req.file ? req.file.buffer : undefined,
       imageType: req.file ? req.file.mimetype : undefined,
       days: JSON.parse(req.body.days),
+      color: req.body.color,
       frequency: req.body.frequency,
     }
 

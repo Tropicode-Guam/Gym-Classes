@@ -27,5 +27,10 @@ yarn-error.log*
 # db
 db/data
 
+# frontend
+settings/*
+!settings/color_palette.json
+!settings/*.sample.*
+
 # misc
 todo.txt

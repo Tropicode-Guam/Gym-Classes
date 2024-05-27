@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { useSnackbar } from 'notistack';
 import { format, parseISO } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
+import { useTheme } from '@mui/material/styles';
+import { ClassCard, ClassCardAction } from './ClassCard';
+import insurances from 'settings/insurances';
+import general from 'settings/general';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -28,6 +31,8 @@ const Landing = () => {
         message: '',
         severity: 'success'
     })
+
+    const theme = useTheme()
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
 
@@ -192,42 +197,32 @@ const Landing = () => {
     }, []);
 
     return (
-        <Container>
+        <Container sx={{ marginTop: 4 }}>
+            <Typography variant="h1" gutterBottom>{general.Title}</Typography>
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
-            <Grid container spacing={4}>
-                {classes.map((classItem) => (
-                    <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="140"
-                                image={`${API_BASE}/images/${classItem._id}`}
-                                alt={classItem.title}
-                                onError={({ currentTarget }) => {
-                                    currentTarget.onerror = null;
-                                }}
-                                style={{ objectFit: 'cover' }}
-                            />
-                            <CardContent>
-                                <Typography variant="h5" component="div">{classItem.title}</Typography>
-                                <Typography variant="body2" color="text.secondary">Start Date: {format(parseISO(classItem.startDate), "MMMM do, yyyy")}</Typography>
-                                {classItem.endDate && <Typography variant="body2" color="text.secondary">End Date: {format(parseISO(classItem.endDate), "MMMM do, yyyy")}</Typography>}
-                                <Typography variant="body2" color="text.secondary">
-                                    Class Size: {classItem.size}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">{classItem.description}</Typography>
-                            </CardContent>
-                            <CardActions>
-                                <Button variant="contained" onClick={() => handleOpen(classItem)}>
-                                    Sign Up
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
+            <Container>
+                <Grid container spacing={1}>
+                    {classes.map((classItem) => (
+                        <Grid item xs={12} sm={6} md={4} key={classItem._id}>
+                            <ClassCard classItem={classItem}>
+                                <ClassCardAction>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => handleOpen(classItem)}
+                                        sx={{
+                                            borderBottomLeftRadius: 100,
+                                        }}
+                                    >
+                                        Sign Up
+                                    </Button>
+                                </ClassCardAction>
+                            </ClassCard>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
             {selectedClassItem && (
                 <Modal
                     open={open}
@@ -268,6 +263,7 @@ const Landing = () => {
                                 margin="normal"
                             />
                             <TextField
+                                select
                                 disabled={classFull}
                                 label="Insurance"
                                 id="insurance"
@@ -277,7 +273,12 @@ const Landing = () => {
                                 required
                                 fullWidth
                                 margin="normal"
-                            />
+                            >
+                                {insurances.map((insurance) => (
+                                    <MenuItem key={insurance} value={insurance}>{insurance}</MenuItem>
+                                ))}
+                                <MenuItem value="Other/None">Other/None</MenuItem>
+                            </TextField>
                             <input type="hidden" name="selectedDate" value={formData.selectedDate} />
                             <input type="hidden" name="selectedClass" value={formData.selectedClass} />
                             <Button type="submit" variant="contained" color="primary" disabled={classFull}>Submit</Button>
