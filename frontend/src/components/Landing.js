@@ -202,22 +202,24 @@ const Landing = () => {
             {error && <Typography color="error">Error fetching classes: {error}</Typography>}
             {loading && <CircularProgress />}
             {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
-            <Grid container spacing={4}>
-                {classes.map((classItem) => (
-                    <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                        <ClassCard classItem={classItem}>
-                            <ClassCardAction>
-                                <Button 
-                                    variant="contained" 
-                                    onClick={() => handleOpen(classItem)}
-                                >
-                                    Sign Up
-                                </Button>
-                            </ClassCardAction>
-                        </ClassCard>
-                    </Grid>
-                ))}
-            </Grid>
+            <Container sx={{ borderLeft: '2px solid black', borderRight: '2px solid black' }}>
+                <Grid container spacing={4}>
+                    {classes.map((classItem) => (
+                        <Grid item xs={12} sm={6} md={4} key={classItem._id}>
+                            <ClassCard classItem={classItem}>
+                                <ClassCardAction>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => handleOpen(classItem)}
+                                    >
+                                        Sign Up
+                                    </Button>
+                                </ClassCardAction>
+                            </ClassCard>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
             {selectedClassItem && (
                 <Modal
                     open={open}

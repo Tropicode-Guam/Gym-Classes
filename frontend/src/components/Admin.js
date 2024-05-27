@@ -301,6 +301,7 @@ function Admin() {
                     <Typography component="h1" variant="h4">
                         Create a Class
                     </Typography>
+                    <Container sx={{ borderLeft: '2px solid black', borderRight: '2px solid black' }}>
                     <Grid 
                         container 
                         spacing={4}
@@ -418,7 +419,6 @@ function Admin() {
                                         {COLOR_PALETTE.map((c, index) =>
                                             <ButtonBase
                                                 variant="contained"
-                                                flat
                                                 color='1'
                                                 key={index}
                                                 sx={{
@@ -467,11 +467,14 @@ function Admin() {
                             </Box>
                         </Grid>
                     </Grid>
+                    </Container>
+                    <Container sx={{ borderLeft: '2px solid black', borderRight: '2px solid black' }}>
                     <ClassList 
                         // rerenders the whole component
                         // but lazy to pull state up to this level
                         key={renderKey}
                     />
+                    </Container>
                     <Button
                         variant="contained"
                         color="secondary"
