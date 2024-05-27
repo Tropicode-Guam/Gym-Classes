@@ -296,19 +296,6 @@ function Admin() {
 
     return (
         <Container className="admin-page" sx={{ marginTop: 4 }}>
-            <Box
-                component="img"
-                src="hilton-logo.png"
-                alt="logo"
-                sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    margin: '16px', // Optional: add some margin
-                    width: '100px', // Adjust the size as needed
-                    height: 'auto', // Maintain aspect ratio
-                }}
-            />
             {loggedIn ? (
                 <>
                     <Typography component="h1" variant="h4">

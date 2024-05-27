@@ -3,10 +3,24 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Landing from './components/Landing';
 import Admin from './components/Admin';
+import { AppBar, Toolbar } from '@mui/material';
 
 export function App() {
   return (
     <Router>
+      <AppBar position="sticky">
+        <Toolbar>
+          <img
+            src="hilton-logo.png"
+            alt='Hilton Logo'
+            height="60px"
+            style={{
+              filter: "invert(100%)",
+              WebkitFilter: "invert(100%)"
+            }}
+          ></img>
+        </Toolbar>
+      </AppBar>
       <div className="App">
         <Routes>
           <Route path="/" element={<Landing />} />
