@@ -378,7 +378,7 @@ function Admin() {
                                     />
                                     <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
                                         Upload Image
-                                        <input type="file" hidden onChange={handleImageChange} />
+                                        <input key={imagePreviewUrl} type="file" hidden onChange={handleImageChange} />
                                     </Button>
                                     <Typography variant="h6" component="h2">
                                         Repeat Frequency
