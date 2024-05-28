@@ -141,10 +141,40 @@ const Landing = () => {
         }
     };
 
+    const scrubPhoneNumber = (val) => {
+        let phoneChars = "(nnn) nnn-nnnn";
+        if (val.length > phoneChars.length || val[0] === '+') {
+            phoneChars = "+" + 'n'.repeat(15);
+            val = '+' + val.replace(/\D/g, '');
+        }
+        let pointer = 0;
+        let buffer = "";
+        for (let i = 0; i < phoneChars.length; i++) {
+            let target = phoneChars[i];
+            let char = val[pointer];
+            if (target === char) {
+                buffer += char;
+                pointer++;
+            } else if (/[0-9]/.test(char)) {
+                if (target === 'n') {
+                    buffer += char;
+                    pointer++;
+                } else {
+                    buffer += target;
+                }
+            }
+        }
+        return buffer
+    }
+
     const handleInputChange = (event) => {
+        let val = event.target.value
+        if (event.target.name === "phone") {
+            val = scrubPhoneNumber(val)
+        }
         setFormData({
             ...formData,
-            [event.target.name]: event.target.value || ''
+            [event.target.name]: val || ''
         });
     };
 
@@ -261,6 +291,7 @@ const Landing = () => {
                                 required
                                 fullWidth
                                 margin="normal"
+                                placeholder="(XXX) XXX-XXXX"
                             />
                             <TextField
                                 select
