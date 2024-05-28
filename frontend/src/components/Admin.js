@@ -468,7 +468,7 @@ function Admin() {
                                 sx={{ position: 'sticky', top: '50%', transform: 'translateY(-50%)' }}
                             >
                                 <Box>
-                                    <ClassCard classItem={previewClassItem}>
+                                    <ClassCard classItem={previewClassItem} key={imagePreviewUrl}>
                                         <ClassCardAction>
                                             <Button variant="contained" sx={{
                                                 borderBottomLeftRadius: 100,
