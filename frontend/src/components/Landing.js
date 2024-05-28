@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, IconButton } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
@@ -7,6 +7,7 @@ import { tzAgnosticDate } from '../utils';
 import { ClassCard, ClassCardAction } from './ClassCard';
 import insurances from 'settings/insurances';
 import general from 'settings/general';
+import CloseIcon from '@mui/icons-material/Close';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -259,6 +260,18 @@ const Landing = () => {
                 >
                     <Box sx={style}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
+                        <IconButton
+                            aria-label="close"
+                            onClick={handleClose}
+                            sx={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                color: (theme) => theme.palette.grey[500],
+                            }}
+                            >
+                            <CloseIcon />
+                        </IconButton>
                         <Calendar
                             tileDisabled={({ date }) => !isThisAClassDay(date, selectedClassItem)}
                             onChange={handleDateChange}
