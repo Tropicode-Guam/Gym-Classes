@@ -60,7 +60,6 @@ function Admin() {
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-    const [imageName, setImageName] = useState('');
 
     const [color, setColor] = useState('');
     const theme = useTheme();
@@ -72,6 +71,10 @@ function Admin() {
             COLOR_PALETTE.push(key)
         }
     });
+
+    const chooseRandomColor = () => {
+        return `${Math.floor(Math.random() * COLOR_PALETTE.length)}`;
+    }
 
     const [days, setDays] = useState({
         Sunday: false,
@@ -186,7 +189,6 @@ function Admin() {
                 setImage(null);
                 setImageType(null);
                 setImagePreviewUrl(null); // Reset image preview URL
-                setImageName(''); // Reset image name
                 setDays({
                     Sunday: false,
                     Monday: false,
@@ -197,7 +199,7 @@ function Admin() {
                     Saturday: false,
                 });
                 setFrequency('none');
-                chooseRandomColor();
+                setColor(chooseRandomColor());
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
@@ -244,7 +246,6 @@ function Admin() {
             setImage(file);
             setImageType(imageType);
             setImagePreviewUrl(URL.createObjectURL(file));
-            setImageName(file.name);
         }
     };
 
@@ -283,10 +284,6 @@ function Admin() {
         }
     };
 
-    const chooseRandomColor = () => {
-        setColor(`${Math.floor(Math.random() * COLOR_PALETTE.length)}`);
-    }
-
     useEffect(() => {
         if (!image) {
             setImagePreviewUrl(null);
@@ -301,7 +298,9 @@ function Admin() {
     }, [image]);
 
     useEffect(() => {
-        chooseRandomColor();
+        setColor(chooseRandomColor());
+        // chooseRandomColor doesn't need to be a dependency
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return (
@@ -435,12 +434,12 @@ function Admin() {
                                                         backgroundColor: `${index}.main`,
                                                         width: 48,
                                                         height: 48,
-                                                        border: color == index ? 2 : 0,
-                                                        borderColor: color == index ? `${index}.contrastText` : null
+                                                        border: color === `${index}` ? 2 : 0,
+                                                        borderColor: color === `${index}` ? `${index}.contrastText` : null
                                                     }}
-                                                    onClick={() => setColor(index)}
+                                                    onClick={() => setColor(`${index}`)}
                                                 >
-                                                    {color == index ? <CheckIcon sx={{ color: `${index}.contrastText` }} /> : null}
+                                                    {color === `${index}` ? <CheckIcon sx={{ color: `${index}.contrastText` }} /> : null}
                                                 </ButtonBase>
                                             )}
                                         </Box>
