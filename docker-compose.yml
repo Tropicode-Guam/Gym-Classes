@@ -6,12 +6,15 @@ services:
     build:
       context: frontend
       args:
-        - HOST=${HOST}:5000
+        - HOST=${HOST}
         - API_BASE=/api
+        - PUBLIC_URL=/classes
     restart: always
     environment:
       - VIRTUAL_HOST=${HOST}
       - VIRTUAL_PORT=3000
+      - VIRTUAL_PATH=/classes
+      - LETSENCRYPT_HOST=${HOST}
       - NODE_ENV=${ENV:-production}
     networks:
       - proxy-network  
@@ -28,8 +31,9 @@ services:
       - DB_PASSWORD=$DB_PASSWORD
       - DB_HOST=db:27017
       - DB_NAME=${DB_NAME:-production}
-    ports:
-      - 5000:5000
+      - VIRTUAL_HOST=${HOST}
+      - VIRTUAL_PORT=5000
+      - VIRTUAL_PATH=/api
     volumes:
       - ./frontend/settings:/usr/src/app/settings:ro
     networks:
@@ -66,6 +70,7 @@ services:
       - vhost:/etc/nginx/vhost.d
       - certs:/etc/nginx/certs
       - share:/usr/share/nginx/html
+      - ./custom-nginx.conf:/etc/nginx/conf.d/custom.conf:ro
     networks:
       - proxy-network
   

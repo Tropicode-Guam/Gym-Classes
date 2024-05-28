@@ -36,8 +36,10 @@ EXPOSE 3000
 # set env variable for build
 ARG HOST
 ARG API_BASE
+ARG PUBLIC_URL
 
 ENV REACT_APP_API=http://${HOST}${API_BASE}
+ENV PUBLIC_URL=${PUBLIC_URL}
 
 # Run the application.
 CMD npm run start

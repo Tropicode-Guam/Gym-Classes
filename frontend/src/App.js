@@ -5,9 +5,11 @@ import Landing from './components/Landing';
 import Admin from './components/Admin';
 import { AppBar, Toolbar } from '@mui/material';
 
+const PUBLIC_URL = process.env.PUBLIC_URL || '';
+
 export function App() {
   return (
-    <Router>
+    <Router basename={PUBLIC_URL}>
       <div className="App">
         <AppBar position="sticky">
           <Toolbar>
