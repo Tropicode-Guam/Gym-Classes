@@ -7,20 +7,23 @@ services:
       context: frontend
       dockerfile: Dockerfile.dev
       args:
-        - HOST=localhost:5000
+        - HOST=localhost
         - API_BASE=/api
+        - PUBLIC_URL=/classes
     restart: always
     environment:
       - VIRTUAL_HOST=localhost
       - VIRTUAL_PORT=3000
+      - VIRTUAL_PATH=/classes
       - NODE_ENV=development
       - API_BASE=/api
+      - PUBLIC_URL=/classes
     ports:
       - 3000:3000
     volumes:
       - ./frontend/src:/usr/src/app/src:ro
       - ./frontend/public:/usr/src/app/public:ro
-      - ./settings:/usr/src/app/settings:ro
+      - ./frontend/settings:/usr/src/app/settings:ro
     networks:
       - proxy-network  
 
@@ -36,13 +39,14 @@ services:
       - DB_PASSWORD=$DB_PASSWORD
       - DB_HOST=db:27017
       - DB_NAME=${DB_NAME:-development}
-    ports:
-      - 5000:5000
+      - VIRTUAL_HOST=localhost
+      - VIRTUAL_PORT=5000
+      - VIRTUAL_PATH=/api
     volumes:
       - ./backend/models:/usr/src/app/models:ro
       - ./backend/server.js:/usr/src/app/server.js:ro
       - ./backend/utils:/usr/src/app/utils:ro
-      - ./settings:/usr/src/app/settings:ro
+      - ./frontend/settings:/usr/src/app/settings:ro
     networks:
       - db
       - proxy-network
@@ -78,6 +82,7 @@ services:
       - vhost:/etc/nginx/vhost.d
       - certs:/etc/nginx/certs
       - share:/usr/share/nginx/html
+      - ./custom-nginx.conf:/etc/nginx/conf.d/custom.conf:ro
     networks:
       - proxy-network
 

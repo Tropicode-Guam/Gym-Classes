@@ -33,6 +33,8 @@ RUN ln -s /usr/src/app/settings /usr/src/app/node_modules/settings
 # set env variable for build
 ARG HOST
 ARG API_BASE
+ARG PUBLIC_URL
+ENV PUBLIC_URL=${PUBLIC_URL}
 
 # build
 RUN REACT_APP_API=$(if test "${HOST}" = "localhost"; \
