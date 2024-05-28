@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, Card, CardContent, CardMedia, CardActions, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
+import { Button, Modal, Box, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { tzAgnosticDate } from '../utils';
-import { useTheme } from '@mui/material/styles';
 import { ClassCard, ClassCardAction } from './ClassCard';
 import insurances from 'settings/insurances';
 import general from 'settings/general';
@@ -31,8 +30,6 @@ const Landing = () => {
         message: '',
         severity: 'success'
     })
-
-    const theme = useTheme()
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
 
