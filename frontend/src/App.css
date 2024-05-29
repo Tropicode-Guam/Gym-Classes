@@ -9,6 +9,7 @@
 	height: 100vh;
 	margin: 0 auto;
 	overflow: auto;
+	padding-bottom: 2rem;
 }
 
 .App-logo {
