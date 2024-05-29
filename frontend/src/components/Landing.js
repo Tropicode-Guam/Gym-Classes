@@ -234,18 +234,7 @@ const Landing = () => {
                 <Grid container spacing={1}>
                     {classes.map((classItem) => (
                         <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                            <ClassCard classItem={classItem}>
-                                <ClassCardAction>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => handleOpen(classItem)}
-                                        sx={{
-                                            borderBottomLeftRadius: 100,
-                                        }}
-                                    >
-                                        Sign Up
-                                    </Button>
-                                </ClassCardAction>
+                            <ClassCard classItem={classItem} onClick={() => handleOpen(classItem)}>
                             </ClassCard>
                         </Grid>
                     ))}

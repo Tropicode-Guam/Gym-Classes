@@ -7,7 +7,7 @@ import { SUB_THEMES } from "../theme";
 const API_BASE = process.env.REACT_APP_API;
 
 export function ClassCard(props) {
-    const { classItem, children } = props;
+    const { classItem, children, onClick } = props;
     const theme = useTheme();
     const cardTheme = theme.palette[classItem.color];
 
@@ -19,6 +19,7 @@ export function ClassCard(props) {
                     backgroundColor: cardTheme.main,
                     borderRadius: 10
                 }}
+                onClick={onClick}
             >
                 <CardMedia
                     component="img"

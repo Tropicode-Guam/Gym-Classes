@@ -469,11 +469,6 @@ function Admin() {
                             >
                                 <Box>
                                     <ClassCard classItem={previewClassItem} key={imagePreviewUrl}>
-                                        <ClassCardAction>
-                                            <Button variant="contained" sx={{
-                                                borderBottomLeftRadius: 100,
-                                            }}>Sign Up</Button>
-                                        </ClassCardAction>
                                     </ClassCard>
                                 </Box>
                             </Grid>
