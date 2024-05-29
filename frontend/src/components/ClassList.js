@@ -286,6 +286,8 @@ function ClassList() {
                                 ))}
                             </tbody>
                         </table>
+                        <h4>Trainer Name: _________________________________</h4>
+                        <h4>Trainer Signature: ______________________________</h4>
                     </div>
                 </Box>
             </Modal>
