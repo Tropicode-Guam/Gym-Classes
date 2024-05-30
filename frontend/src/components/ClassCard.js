@@ -37,7 +37,15 @@ export function ClassCard(props) {
                             {`${classItem.startDate ? format(parseISO(classItem.startDate), 'MMMM do') : 'DATE'} ${classItem.endDate ? ` - ${format(parseISO(classItem.endDate), 'MMMM do')}` : ''}`}
                         </Typography>
                     </Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2"
+                        sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: "2",
+                            WebkitBoxOrient: "vertical",
+                        }}
+                    >
                         {classItem.description || 'DESCRIPTION'}
                     </Typography>
                 </CardContent>
