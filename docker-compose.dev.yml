@@ -7,12 +7,12 @@ services:
       context: frontend
       dockerfile: Dockerfile.dev
       args:
-        - HOST=localhost
+        - HOST=${HOST:-localhost}
         - API_BASE=/api
         - PUBLIC_URL=/classes
     restart: always
     environment:
-      - VIRTUAL_HOST=localhost
+      - VIRTUAL_HOST=${HOST:-localhost}
       - VIRTUAL_PORT=3000
       - VIRTUAL_PATH=/classes
       - NODE_ENV=development
@@ -39,7 +39,7 @@ services:
       - DB_PASSWORD=$DB_PASSWORD
       - DB_HOST=db:27017
       - DB_NAME=${DB_NAME:-development}
-      - VIRTUAL_HOST=localhost
+      - VIRTUAL_HOST=${HOST:-localhost}
       - VIRTUAL_PORT=5000
       - VIRTUAL_PATH=/api
     volumes:
