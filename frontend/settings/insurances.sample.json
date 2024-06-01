@@ -1,5 +1,20 @@
-[
-    "Insurance 1",
-    "Insurance 2",
-    "Other Option in Insurance Dropdown"
-]
+{
+    "Insurances": [
+        "Insurance 1",
+        "Insurance 2",
+        "Insurance 3",
+        "Other Option in Insurance Dropdown"
+    ],
+    "Sponsors": [
+        "Insurance 1",
+        "Insurance 2",
+        {
+            "name": "Insurance 3",
+            "also_free_for": "Insurance 2"
+        },
+        {
+            "name": "Other Option in Insurance Dropdown",
+            "also_free_for": "all"
+        }
+    ]
+}

@@ -9,6 +9,7 @@ import insurances from 'settings/insurances';
 import general from 'settings/general';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+insurances = insurances.Insurances
 
 const API_BASE = process.env.REACT_APP_API;
 

@@ -8,7 +8,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
 import { ClassCard } from './ClassCard';
-import sponsors from 'settings/sponsors';
+import insurances from 'settings/insurances';
+const sponsors = insurances.Sponsors.map(s => s.name || s);
 
 const API_BASE = process.env.REACT_APP_API;
 

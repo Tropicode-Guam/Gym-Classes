@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const insurances = require('../settings/insurances.json');
+const insurances = require('../settings/insurances.json').Insurances;
 
 
 const signUpSchema = new mongoose.Schema({

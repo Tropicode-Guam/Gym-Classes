@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const sponsors = require('../settings/sponsors.json');
+const sponsors = require('../settings/insurances.json').Sponsors.map(s => s.name || s);
 
 const classSchema = new mongoose.Schema({
     title: {
