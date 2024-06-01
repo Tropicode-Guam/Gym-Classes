@@ -37,6 +37,7 @@ const classSchema = new mongoose.Schema({
     },
     frequency: {
         type: String,
+        enum: ['none', 'daily', 'weekly', 'bi-weekly', 'monthly'],
         required: true
     },
     color: {

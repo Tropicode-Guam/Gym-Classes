@@ -1,4 +1,4 @@
-import { Card, CardContent, CardMedia, Dialog, DialogContent, DialogContentText, IconButton, Typography } from "@mui/material";
+import { Box, Card, CardContent, CardMedia, Dialog, DialogContent, DialogContentText, IconButton, Typography } from "@mui/material";
 import { format, parseISO } from 'date-fns';
 import { useTheme, ThemeProvider, alpha } from '@mui/material/styles';
 import React from 'react';
@@ -27,6 +27,39 @@ export function ClassCard(props) {
     const theme = useTheme();
     const cardTheme = theme.palette[classItem.color];
     const [isOpen, setIsOpen] = useState(false);
+
+    let freqDisp = "";
+    switch (classItem.frequency) {
+        case "none":
+            freqDisp = format(parseISO(classItem.startDate), 'MMMM do');
+            break;
+        case "weekly":
+            const daysOrder = [1,2,3,4,5,6,0];
+            const daysLetters = "SMTWTFS"
+            const days = {}
+            daysOrder.forEach((i) => {
+                days[i] = classItem.days.includes(i)
+            })
+            freqDisp = (
+                <Typography display="inline">
+                    ({daysOrder.map(i => {
+                        return (<Typography display="inline"
+                            sx={{
+                                color: days[i] ? 'inherit' : theme.palette.grey[500],
+                                fontWeight: days[i] ? 'bold' : 'normal'
+                            }}
+                        >{daysLetters[i]}</Typography>)
+                    })})
+                </Typography>
+            )
+            break;
+        case "bi-weekly":
+            freqDisp = "Every other week";
+            break;
+        default:
+            freqDisp = classItem.frequency[0].toUpperCase() + classItem.frequency.slice(1);
+            break;
+    }
 
     const close = function() {
         onClose && onClose();
@@ -63,7 +96,7 @@ export function ClassCard(props) {
                     <CardContent>
                         <Typography variant="h5" component="div">
                             {classItem.title || 'TITLE'} | <Typography variant="body2" display={"inline"}>
-                                {`${classItem.startDate ? format(parseISO(classItem.startDate), 'MMMM do') : 'DATE'} ${classItem.endDate ? ` - ${format(parseISO(classItem.endDate), 'MMMM do')}` : ''}`}
+                                {freqDisp}
                             </Typography>
                         </Typography>
                         {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
@@ -122,7 +155,14 @@ export function ClassCard(props) {
                     <CloseIcon />
                 </IconButton>
                 <DialogContent>
-                    <Typography variant="h5">{classItem.title}</Typography>
+                    {/* <Box sx={{
+                        display: 'flex', 
+                        flexDirection: 'row', 
+                        justifyContent: 'space-between'
+                    }}> */}
+                        <Typography variant="h5" display="inline">{classItem.title} | </Typography>
+                        <Typography variant="body1" display="inline">{freqDisp}</Typography>
+                    {/* </Box> */}
                     {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     {classItem.trainer && <Typography variant="body1">Hosted by {classItem.trainer}</Typography>}
                     <DialogContentText>{classItem.description}</DialogContentText>
