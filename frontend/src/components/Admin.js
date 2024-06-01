@@ -371,10 +371,18 @@ function Admin() {
                                     />
                                     <TextField
                                         label="Max Class Size"
+                                        type="number"
+                                        inputProps={{ min: 1 }}
                                         fullWidth
                                         margin="normal"
                                         value={size}
-                                        onChange={(e) => setSize(e.target.value)}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (val < 1) {
+                                                val = 1
+                                            }
+                                            setSize(val)
+                                        }}
                                     />
                                     <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
                                         Upload Image
