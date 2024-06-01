@@ -7,7 +7,8 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
-import { ClassCard, ClassCardAction } from './ClassCard';
+import { ClassCard } from './ClassCard';
+import sponsors from 'settings/sponsors';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -54,6 +55,7 @@ function Admin() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [sponsor, setSponsor] = useState('None')
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [size, setSize] = useState('');
@@ -164,6 +166,7 @@ function Admin() {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
+        formData.append('sponsor', sponsor === 'None' ? '' : sponsor);
         formData.append('startDate', startDate);
         formData.append('endDate', endDate);
         formData.append('size', size);
@@ -183,6 +186,7 @@ function Admin() {
             if (response.ok) {
                 setTitle('');
                 setDescription('');
+                setSponsor('None');
                 setStartDate('');
                 setEndDate('');
                 setSize('');
@@ -321,6 +325,7 @@ function Admin() {
                                 <Box component="form" onSubmit={handleNewClass} noValidate sx={{ mt: 3 }}>
                                     <TextField
                                         label="Title"
+                                        required
                                         fullWidth
                                         margin="normal"
                                         value={title}
@@ -328,6 +333,7 @@ function Admin() {
                                     />
                                     <TextField
                                         label="Description"
+                                        required
                                         fullWidth
                                         multiline
                                         minRows={2}
@@ -336,7 +342,25 @@ function Admin() {
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
                                     <TextField
+                                        select
+                                        displayEmpty
+                                        label="Sponsor"
+                                        id="sponsor"
+                                        name="sponsor"
+                                        value={sponsor}
+                                        onChange={(e) => setSponsor(e.target.value)}
+                                        required
+                                        fullWidth
+                                        margin="normal"
+                                    >
+                                        <MenuItem value={'None'}>None</MenuItem>
+                                        {sponsors.map((sp) => (
+                                            <MenuItem key={sp} value={sp}>{sp}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <TextField
                                         label="Start Date"
+                                        required
                                         type="datetime-local"
                                         fullWidth
                                         margin="normal"
@@ -371,6 +395,7 @@ function Admin() {
                                     />
                                     <TextField
                                         label="Max Class Size"
+                                        required
                                         fullWidth
                                         margin="normal"
                                         value={size}
@@ -383,7 +408,7 @@ function Admin() {
                                     <Typography variant="h6" component="h2">
                                         Repeat Frequency
                                     </Typography>
-                                    <FormControl fullWidth margin="normal">
+                                    <FormControl required fullWidth margin="normal">
                                         <InputLabel id="frequency-label">Frequency</InputLabel>
                                         <Select
                                             labelId="frequency-label"

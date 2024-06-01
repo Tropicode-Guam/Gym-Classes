@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const sponsors = require('../settings/sponsors.json');
+
 const classSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -40,6 +42,10 @@ const classSchema = new mongoose.Schema({
     color: {
         type: String,
         default: "0"
+    },
+    sponsor: {
+        type: String,
+        enum: [...sponsors, null]
     }
 });
 

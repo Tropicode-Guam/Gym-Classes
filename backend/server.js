@@ -256,6 +256,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
     const opts = {
       title: req.body.title,
       description: req.body.description,
+      sponsor: req.body.sponsor || null,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       size: req.body.size,

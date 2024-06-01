@@ -66,6 +66,7 @@ export function ClassCard(props) {
                                 {`${classItem.startDate ? format(parseISO(classItem.startDate), 'MMMM do') : 'DATE'} ${classItem.endDate ? ` - ${format(parseISO(classItem.endDate), 'MMMM do')}` : ''}`}
                             </Typography>
                         </Typography>
+                        {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                         <Typography variant="body2"
                             sx={{
                                 overflow: "hidden",
@@ -121,6 +122,7 @@ export function ClassCard(props) {
                 </IconButton>
                 <DialogContent>
                     <Typography variant="h5">{classItem.title}</Typography>
+                    {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     <DialogContentText>{classItem.description}</DialogContentText>
                     <DialogActions sx={{ paddingLeft: 0, paddingRight: 0 }}>
                         { children }
