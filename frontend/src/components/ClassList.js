@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format, parseISO } from 'date-fns';
-import { ClassCard, ClassCardAction } from './ClassCard';
+import { ClassCard } from './ClassCard';
 
 const API_BASE = process.env.REACT_APP_API;
 
