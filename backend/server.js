@@ -257,6 +257,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       title: req.body.title,
       description: req.body.description,
       sponsor: req.body.sponsor || null,
+      trainer: req.body.trainer || null,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       size: req.body.size,

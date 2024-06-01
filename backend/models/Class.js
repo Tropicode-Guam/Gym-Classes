@@ -45,7 +45,12 @@ const classSchema = new mongoose.Schema({
     },
     sponsor: {
         type: String,
-        enum: [...sponsors, null]
+        enum: [...sponsors, null],
+        default: null
+    },
+    trainer: {
+        type: String,
+        default: null
     }
 });
 

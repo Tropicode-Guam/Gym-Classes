@@ -56,6 +56,7 @@ function Admin() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [sponsor, setSponsor] = useState('None')
+    const [trainer, setTrainer] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [size, setSize] = useState('');
@@ -102,6 +103,8 @@ function Admin() {
     const previewClassItem = {
         title: title,
         description: description,
+        sponsor: sponsor === 'None' ? '' : sponsor,
+        trainer: trainer,
         startDate: startDate,
         endDate: endDate,
         frequency: frequency,
@@ -170,6 +173,7 @@ function Admin() {
         formData.append('title', title);
         formData.append('description', description);
         formData.append('sponsor', sponsor === 'None' ? '' : sponsor);
+        formData.append('trainer', trainer || null);
         formData.append('startDate', startDate);
         formData.append('endDate', endDate);
         formData.append('size', size);
@@ -190,6 +194,7 @@ function Admin() {
                 setTitle('');
                 setDescription('');
                 setSponsor('None');
+                setTrainer('');
                 setStartDate('');
                 setEndDate('');
                 setSize('');
@@ -363,6 +368,14 @@ function Admin() {
                                         {sponsors.map((sp) => (
                                             <MenuItem key={sp} value={sp}>{sp}</MenuItem>
                                         ))}
+                                    </TextField>
+                                    <TextField
+                                        label="Trainer"
+                                        fullWidth
+                                        margin="normal"
+                                        value={trainer}
+                                        onChange={(e) => setTrainer(e.target.value)}
+                                    >
                                     </TextField>
                                     <TextField
                                         label="Start Date"
