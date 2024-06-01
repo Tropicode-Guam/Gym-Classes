@@ -1,6 +1,6 @@
 import { Card, CardContent, CardMedia, Dialog, DialogContent, DialogContentText, IconButton, Typography } from "@mui/material";
 import { format, parseISO } from 'date-fns';
-import { useTheme, ThemeProvider } from '@mui/material/styles';
+import { useTheme, ThemeProvider, alpha } from '@mui/material/styles';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { SUB_THEMES } from "../theme";
@@ -116,6 +116,7 @@ export function ClassCard(props) {
                         right: 8,
                         top: 8,
                         color: (theme) => theme.palette.grey[500],
+                        backgroundColor: (theme) => alpha(theme.palette.grey[100], .75),
                     }}
                 >
                     <CloseIcon />
