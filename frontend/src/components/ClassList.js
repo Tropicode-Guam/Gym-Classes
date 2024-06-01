@@ -265,7 +265,7 @@ function ClassList() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th></th>
+                                    <th style={{ width: '11%' }}>Here ✔️</th>
                                     <th>Name</th>
                                     <th>Phone</th>
                                     <th>Insurance</th>

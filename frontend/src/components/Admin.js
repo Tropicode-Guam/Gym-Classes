@@ -95,6 +95,8 @@ function Admin() {
 
     const [renderKey, setRenderKey] = useState(0);
 
+    const[showRequiredFields, setShowRequiredFields] = useState(false);
+
     const dayOfWeek = getDOWFromDateString(startDate)
 
     const previewClassItem = {
@@ -149,7 +151,8 @@ function Admin() {
         setLoading(true);
 
         if ([title, description, startDate, size, image].some(field => !field)) {
-            setErrorMsg('All fields are required');
+            setErrorMsg('Missing required fields');
+            setShowRequiredFields(true)
             setErrorOpen(true);
             setLoading(false);
             return; // Add return to prevent further execution
@@ -227,6 +230,7 @@ function Admin() {
         } finally {
             setLoading(false);
             setRenderKey(renderKey + 1);
+            setShowRequiredFields(false);
         }
     };
 
@@ -326,6 +330,7 @@ function Admin() {
                                     <TextField
                                         label="Title"
                                         required
+                                        error={showRequiredFields && !title}
                                         fullWidth
                                         margin="normal"
                                         value={title}
@@ -334,6 +339,7 @@ function Admin() {
                                     <TextField
                                         label="Description"
                                         required
+                                        error={showRequiredFields && !description}
                                         fullWidth
                                         multiline
                                         minRows={2}
@@ -361,6 +367,7 @@ function Admin() {
                                     <TextField
                                         label="Start Date"
                                         required
+                                        error={showRequiredFields && !startDate}
                                         type="datetime-local"
                                         fullWidth
                                         margin="normal"
@@ -395,11 +402,20 @@ function Admin() {
                                     />
                                     <TextField
                                         label="Max Class Size"
+                                        type="number"
+                                        inputProps={{ min: 1 }}
                                         required
+                                        error={showRequiredFields && !size}
                                         fullWidth
                                         margin="normal"
                                         value={size}
-                                        onChange={(e) => setSize(e.target.value)}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (val < 1) {
+                                                val = 1
+                                            }
+                                            setSize(val)
+                                        }}
                                     />
                                     <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
                                         Upload Image
