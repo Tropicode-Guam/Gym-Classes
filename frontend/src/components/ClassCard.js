@@ -31,7 +31,7 @@ export function ClassCard(props) {
     let freqDisp = "";
     switch (classItem.frequency) {
         case "none":
-            freqDisp = format(parseISO(classItem.startDate), 'MMMM do');
+            freqDisp = classItem.startDate && format(parseISO(classItem.startDate), 'MMMM do');
             break;
         case "weekly":
             const daysOrder = [0,1,2,3,4,5,6];
