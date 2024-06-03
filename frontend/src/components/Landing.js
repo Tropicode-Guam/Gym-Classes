@@ -238,8 +238,10 @@ const Landing = () => {
                                         <Grid item xs={12} md={6} order={(xs && 2) || 1}>
                                             <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
                                             <Calendar
+                                                calendarType='gregory'
                                                 tileDisabled={({ date }) => !isThisAClassDay(date, classItem)}
                                                 onChange={handleDateChange}
+                                                formatDay={(locale, date) => <b style={{color: theme.palette.grey[500]}}>{format(date, 'd')}</b>}
                                             />
                                             {classFull && <Typography id="modal-modal-title" variant="h6" component="h2">Class full</Typography>}
                                             {numParticipants}/{classItem.size} Participants

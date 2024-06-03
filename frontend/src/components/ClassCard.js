@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CardMedia, Dialog, DialogContent, DialogContentText, IconButton, Typography } from "@mui/material";
+import { Card, CardContent, CardMedia, Dialog, DialogContent, DialogContentText, IconButton, Typography } from "@mui/material";
 import { format, parseISO } from 'date-fns';
 import { useTheme, ThemeProvider, alpha } from '@mui/material/styles';
 import React from 'react';
@@ -34,7 +34,7 @@ export function ClassCard(props) {
             freqDisp = format(parseISO(classItem.startDate), 'MMMM do');
             break;
         case "weekly":
-            const daysOrder = [1,2,3,4,5,6,0];
+            const daysOrder = [0,1,2,3,4,5,6];
             const daysLetters = "SMTWTFS"
             const days = {}
             daysOrder.forEach((i) => {
