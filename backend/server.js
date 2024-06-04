@@ -220,7 +220,7 @@ const withinDaysBeforeClass = (classItem, date) => {
 
 router.post('/signup', async (req, res) => {
   try {
-    const { name, phone, insurance, selectedDate, selectedClass } = req.body;
+    const { name, phone, gymMembership, insurance, selectedDate, selectedClass } = req.body;
     const classObj = await Class.findById(selectedClass);
 
     // check class and date to ensure they're valid
@@ -253,7 +253,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Class is full' });
     }
 
-    const signupData = { name, phone, insurance, selectedDate, selectedClass };
+    const signupData = { name, phone, gymMembership, insurance, selectedDate, selectedClass };
     const signup = new SignUp(signupData);
     await signup.save();
     res.status(201).json({ message: 'User signed up successfully!', signupData });
@@ -334,10 +334,11 @@ router.get('/signups', async (req, res) => {
     }
     const signups = await SignUp.find(filter).sort({ selectedDate: -1 });
     const csvData = [
-      ['Name', 'Phone', 'Insurance', 'Selected Date', 'Selected Class'],
+      ['Name', 'Phone', 'Gym Membership', 'Insurance', 'Selected Date', 'Selected Class'],
       ...signups.map(signup => [
         signup.name,
         signup.phone,
+        signup.gymMembership,
         signup.insurance,
         signup.selectedDate.toLocaleDateString(),
         classesMap[signup.selectedClass] && classesMap[signup.selectedClass].title || 'Deleted Class'

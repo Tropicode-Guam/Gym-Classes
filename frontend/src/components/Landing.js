@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem } from '@mui/material';
+import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, Checkbox, FormControlLabel } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
@@ -9,6 +9,7 @@ import insurances from 'settings/insurances';
 import general from 'settings/general';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Collapse from '@mui/material/Collapse';
 insurances = insurances.Insurances
 
 const API_BASE = process.env.REACT_APP_API;
@@ -21,11 +22,13 @@ const Landing = () => {
     const emptyFormData = {
         name: '',
         phone: '',
+        gymMembership: '',
         insurance: '',
         selectedDate: '',
         selectedClass: ''
     }
     const [formData, setFormData] = useState({...emptyFormData});
+    const [hasGymMembership, setHasGymMembership] = useState(false);
     const [loading, setLoading] = useState(true);
     const [numParticipants, setNumParticipants] = useState(0);
 
@@ -39,6 +42,7 @@ const Landing = () => {
     const xs = useMediaQuery(theme.breakpoints.up('md'));
 
     const resetFormData = () => {
+        setHasGymMembership(false);
         setFormData({...emptyFormData})
     }
 
@@ -105,6 +109,11 @@ const Landing = () => {
             if (!formData.selectedDate) {
                 enqueueSnackbar('Please select a date', { variant: 'error' });
                 return;
+            }
+
+            if (hasGymMembership && !formData.gymMembership) {
+                enqueueSnackbar('Please enter your gym membership number', { variant: 'error' });
+                return
             }
 
             const response = await fetch(`${API_BASE}/signup`, {
@@ -306,6 +315,32 @@ const Landing = () => {
                                                 margin="normal"
                                                 placeholder="(XXX) XXX-XXXX"
                                             />
+                                            <FormControlLabel control={
+                                                <Checkbox 
+                                                    disabled={classFull}
+                                                    checked={hasGymMembership} 
+                                                    onChange={(e) => {
+                                                        const val = e.target.checked
+                                                        setHasGymMembership(val);
+                                                        if (!val) {
+                                                            setFormData({...formData, gymMembership: ''})
+                                                        }
+                                                    }
+                                                } />
+                                            } label="I have a gym membership" />
+                                            <Collapse in={hasGymMembership}>
+                                                <TextField
+                                                    disabled={classFull}
+                                                    label="Gym Membership Number"
+                                                    id="gymMembership"
+                                                    name="gymMembership"
+                                                    value={formData.gymMembership}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    fullWidth
+                                                    margin="normal"
+                                                />
+                                            </Collapse>
                                             <TextField
                                                 select
                                                 disabled={classFull}

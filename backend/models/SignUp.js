@@ -22,6 +22,10 @@ const signUpSchema = new mongoose.Schema({
         required: true,
         enum: [...insurances, 'Other/None']
     },
+    gymMembership: {
+        type: String,
+        required: false
+    },
     selectedDate: {
         type: Date,
         required: true
