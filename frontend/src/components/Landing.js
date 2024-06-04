@@ -169,6 +169,10 @@ const Landing = () => {
     };
 
     const handleDateChange = (date) => {
+        if (!withinDaysBeforeClass(selectedClassItem, date)) {
+            enqueueSnackbar(`You can only sign up ${selectedClassItem.daysPriorCanSignUp} days in advance for this class`, { variant: 'error' })
+            return
+        }
         fetchUserCount(selectedClassItem, date);
         setFormData({
             ...formData,
@@ -210,6 +214,18 @@ const Landing = () => {
         }
     };
 
+    const withinDaysBeforeClass = (classItem, date) => {
+        if (!classItem.daysPriorCanSignUp) {
+            return true
+        }
+        const today = new Date()
+        today.setHours(0,0,0,0)
+        const current = new Date(date)
+        const diff = current - today
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        return days <= classItem.daysPriorCanSignUp
+    }
+
     useEffect(() => {
         fetchClasses().then(() => {
             setLoading(false);
@@ -238,11 +254,29 @@ const Landing = () => {
                                         <Grid item xs={12} md={6} order={(xs && 2) || 1}>
                                             <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
                                             <Calendar
+                                                value={formData.selectedDate}
                                                 calendarType='gregory'
                                                 tileDisabled={({ date }) => !isThisAClassDay(date, classItem)}
                                                 onChange={handleDateChange}
-                                                formatDay={(locale, date) => <b style={{color: theme.palette.grey[500]}}>{format(date, 'd')}</b>}
+                                                minDetail="month"
+                                                formatDay={(locale, date) => {
+                                                    const s = format(date, 'd');
+                                                    if (classItem.daysPriorCanSignUp) {
+                                                        const today = new Date()
+                                                        today.setHours(0,0,0,0)
+                                                        const current = new Date(date)
+
+                                                        if (withinDaysBeforeClass(classItem, date) && current >= today) {
+                                                            return <Typography variant="body2" sx={{fontWeight: 'bold', color: 'green'}}>{s}</Typography>
+                                                        } else {
+                                                            return <Typography variant="body2" sx={{color: theme.palette.grey[500]}}>{s}</Typography>
+                                                        }
+                                                    } else {
+                                                        return <Typography variant="body2" sx={{fontWeight: 'bold', color: theme.palette.grey[500]}}>{s}</Typography>
+                                                    }
+                                                }}
                                             />
+                                            {classItem.daysPriorCanSignUp !== 0 && <Typography variant="body1" sx={{color: 'green'}}>You can only sign up {classItem.daysPriorCanSignUp} days before the class</Typography>}
                                             {classFull && <Typography id="modal-modal-title" variant="h6" component="h2">Class full</Typography>}
                                             {numParticipants}/{classItem.size} Participants
                                         </Grid>

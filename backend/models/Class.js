@@ -40,6 +40,16 @@ const classSchema = new mongoose.Schema({
         enum: ['none', 'daily', 'weekly', 'bi-weekly', 'monthly'],
         required: true
     },
+    daysPriorCanSignUp: {
+        type: Number,
+        default: 2,
+        validate: {
+            validator: function(v) {
+                return  Number.isInteger(v) && v >= 0;
+            },
+            message: props => `${props.path} needs to be an integer 0 or greater. ${props.value} was given`
+        }
+    },
     color: {
         type: String,
         default: "0"

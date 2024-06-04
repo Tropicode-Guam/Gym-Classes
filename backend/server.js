@@ -206,6 +206,18 @@ const upload = multer({
   }
 });
 
+const withinDaysBeforeClass = (classItem, date) => {
+  if (!classItem.daysPriorCanSignUp) {
+      return true
+  }
+  const today = new Date()
+  today.setHours(0,0,0,0)
+  const current = new Date(date)
+  const diff = current - today
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  return days <= classItem.daysPriorCanSignUp
+}
+
 router.post('/signup', async (req, res) => {
   try {
     const { name, phone, insurance, selectedDate, selectedClass } = req.body;
@@ -223,6 +235,10 @@ router.post('/signup', async (req, res) => {
 
     if (!isThisAClassDay(selectedDate, classObj)) {
       return res.status(400).json({ error: 'Date isn\'t a class date' });
+    }
+
+    if (!withinDaysBeforeClass(classObj, selectedDate)) {
+      return res.status(400).json({error: `This class doesn't accept signups more than ${classObj.daysPriorCanSignUp} days in advance`})
     }
 
     const signups = await SignUp.find({
@@ -263,6 +279,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       size: req.body.size,
       image: req.file ? req.file.buffer : undefined,
       imageType: req.file ? req.file.mimetype : undefined,
+      daysPriorCanSignUp: req.body.daysPriorCanSignUp,
       days: JSON.parse(req.body.days),
       color: req.body.color,
       frequency: req.body.frequency,

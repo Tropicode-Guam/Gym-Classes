@@ -89,7 +89,9 @@ function Admin() {
         Friday: false,
         Saturday: false,
     });
+    const DEFAULT_DAYS_PRIOR_CAN_SIGN_UP = 2
     const [frequency, setFrequency] = useState('none');
+    const [daysPriorCanSignUp, setDaysPriorCanSignUp] = useState(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
 
     // Define the error state variables
     const [errorMsg, setErrorMsg] = useState('');
@@ -182,6 +184,7 @@ function Admin() {
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
+        formData.append('daysPriorCanSignUp', daysPriorCanSignUp);
         formData.append('color', color);
         formData.append('key', authKey); // Include the key in the request body
 
@@ -212,6 +215,7 @@ function Admin() {
                     Saturday: false,
                 });
                 setFrequency('none');
+                setDaysPriorCanSignUp(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
                 setColor(chooseRandomColor());
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
@@ -413,6 +417,22 @@ function Admin() {
                                         InputLabelProps={{ shrink: true }}
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                    <TextField
+                                        label="Users can sign up this many days prior to the class"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        required
+                                        fullWidth
+                                        margin="normal"
+                                        value={daysPriorCanSignUp}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (val < 0 || val === '') {
+                                                val = 0
+                                            }
+                                            setDaysPriorCanSignUp(val)
+                                        }}
                                     />
                                     <TextField
                                         label="Max Class Size"
