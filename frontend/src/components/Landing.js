@@ -24,6 +24,7 @@ const Landing = () => {
         phone: '',
         gymMembership: '',
         insurance: '',
+        insuranceMemberId: '',
         selectedDate: '',
         selectedClass: ''
     }
@@ -116,6 +117,11 @@ const Landing = () => {
                 return
             }
 
+            if (formData.insurance === 'Other/None' && !formData.insuranceMemberId) {
+                enqueueSnackbar('Please enter your insurance member id', { variant: 'error' });
+                return
+            }
+
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
                 headers: {
@@ -170,6 +176,12 @@ const Landing = () => {
         let val = event.target.value
         if (event.target.name === "phone") {
             val = scrubPhoneNumber(val)
+        }
+        if (event.target.name === "insurance" && val === 'Other/None') {
+            setFormData({
+                ...formData,
+                insuranceMemberId: ''
+            })
         }
         setFormData({
             ...formData,
@@ -358,6 +370,19 @@ const Landing = () => {
                                                 ))}
                                                 <MenuItem value="Other/None">Other/None</MenuItem>
                                             </TextField>
+                                            <Collapse in={formData.insurance && formData.insurance !== "Other/None"}>
+                                                <TextField
+                                                    disabled={classFull}
+                                                    label="Insurance Member ID"
+                                                    id="insuranceMemberId"
+                                                    name="insuranceMemberId"
+                                                    value={formData.insuranceMemberId}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    fullWidth
+                                                    margin="normal"
+                                                />
+                                            </Collapse>
                                             <input type="hidden" name="selectedDate" value={formData.selectedDate} />
                                             <input type="hidden" name="selectedClass" value={formData.selectedClass} />
                                         </Grid>

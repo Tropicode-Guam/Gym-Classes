@@ -22,6 +22,10 @@ const signUpSchema = new mongoose.Schema({
         required: true,
         enum: [...insurances, 'Other/None']
     },
+    insuranceMemberId: {
+        type: String,
+        required: [function() { return this.insurance !== 'Other/None' }, `a member id is required for ${this.insurance}`]
+    },
     gymMembership: {
         type: String,
         required: false
