@@ -95,7 +95,7 @@ export function ClassCard(props) {
                     />
                     <CardContent>
                         <Typography variant="h5" component="div">
-                            {classItem.title || 'TITLE'} | <Typography variant="body2" display={"inline"}>
+                            {classItem.title || 'TITLE'} | <Typography variant="body1" display={"inline"}>
                                 {freqDisp}
                             </Typography>
                         </Typography>
