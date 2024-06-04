@@ -166,7 +166,7 @@ export function ClassCard(props) {
                     {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     {classItem.trainer && <Typography variant="body1">Hosted by {classItem.trainer}</Typography>}
                     <DialogContentText>{classItem.description}</DialogContentText>
-                    <DialogActions sx={{ paddingLeft: 0, paddingRight: 0 }}>
+                    <DialogActions sx={{ paddingLeft: 0, paddingRight: 0, paddingTop: 4}}>
                         { children }
                     </DialogActions>
                 </DialogContent>
