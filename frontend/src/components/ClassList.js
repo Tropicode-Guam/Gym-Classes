@@ -268,6 +268,7 @@ function ClassList() {
                                     <th style={{ width: '11%' }}>Here ✔️</th>
                                     <th>Name</th>
                                     <th>Phone</th>
+                                    <th style={{ width: '11%' }}>Gym Member</th>
                                     <th>Insurance</th>
                                 </tr>
                             </thead>
@@ -277,6 +278,7 @@ function ClassList() {
                                         <td></td>
                                         <td>{user.name}</td>
                                         <td>{user.phone}</td>
+                                        <td>{user.gymMembership && '✔️'}</td>
                                         <td>{user.insurance}</td>
                                     </tr>
                                 ))}
