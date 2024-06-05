@@ -385,7 +385,7 @@ const Landing = () => {
                                                     name="gymMembership"
                                                     value={formData.gymMembership}
                                                     onChange={handleInputChange}
-                                                    required
+                                                    required={hasGymMembership}
                                                     fullWidth
                                                     margin="normal"
                                                 />
@@ -415,7 +415,7 @@ const Landing = () => {
                                                     name="insuranceMemberId"
                                                     value={formData.insuranceMemberId}
                                                     onChange={handleInputChange}
-                                                    required
+                                                    required={formData.insurance && formData.insurance !== "Other/None"}
                                                     fullWidth
                                                     margin="normal"
                                                 />
