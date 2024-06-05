@@ -429,6 +429,7 @@ function Admin() {
                                         inputProps={{ min: 0 }}
                                         required
                                         fullWidth
+                                        helperText="* Set to 0 to allow signups for any future class"
                                         margin="normal"
                                         value={daysPriorCanSignUp}
                                         onChange={(e) => {
