@@ -105,6 +105,22 @@ function Admin() {
 
     const dayOfWeek = getDOWFromDateString(startDate)
 
+    const getDaysAsNumbers = () => {
+        const dayMapping = {
+            Sunday: 0,
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+        };
+
+        return Object.entries(days)
+            .filter(([day, isSelected]) => isSelected)
+            .map(([day]) => dayMapping[day]);
+    };
+
     const previewClassItem = {
         title: title,
         description: description,
@@ -113,7 +129,7 @@ function Admin() {
         startDate: startDate,
         endDate: endDate,
         frequency: frequency,
-        days: days,
+        days: getDaysAsNumbers(),
         imageUrl: imagePreviewUrl,
         imageType: imageType,
         size: size,
@@ -271,21 +287,6 @@ function Admin() {
         }
     };
 
-    const getDaysAsNumbers = () => {
-        const dayMapping = {
-            Sunday: 0,
-            Monday: 1,
-            Tuesday: 2,
-            Wednesday: 3,
-            Thursday: 4,
-            Friday: 5,
-            Saturday: 6,
-        };
-
-        return Object.entries(days)
-            .filter(([day, isSelected]) => isSelected)
-            .map(([day]) => dayMapping[day]);
-    };
 
     const fetchSignups = async () => {
         try {
