@@ -281,6 +281,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       size: req.body.size,
+      fee: req.body.fee,
       image: req.file ? req.file.buffer : undefined,
       imageType: req.file ? req.file.mimetype : undefined,
       daysPriorCanSignUp: req.body.daysPriorCanSignUp,

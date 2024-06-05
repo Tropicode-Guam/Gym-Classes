@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress, Snackbar, Alert, ButtonBase, Grid
+    CircularProgress, Snackbar, Alert, ButtonBase, Grid,
+    InputAdornment
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
@@ -61,6 +62,7 @@ function Admin() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [size, setSize] = useState('');
+    const [fee, setFee] = useState(0);
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
@@ -181,6 +183,7 @@ function Admin() {
         formData.append('endDate', endDate);
         formData.append('size', size);
         formData.append('image', image);
+        formData.append('fee', fee);
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
@@ -202,6 +205,7 @@ function Admin() {
                 setStartDate('');
                 setEndDate('');
                 setSize('');
+                setFee(0);
                 setImage(null);
                 setImageType(null);
                 setImagePreviewUrl(null); // Reset image preview URL
@@ -449,6 +453,30 @@ function Admin() {
                                                 val = 1
                                             }
                                             setSize(val)
+                                        }}
+                                    />
+                                    <TextField
+                                        label="Fee"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        required
+                                        error={showRequiredFields && fee === ''}
+                                        fullWidth
+                                        margin="normal"
+                                        value={fee}
+                                        onChange={(e) => {
+                                            let val = e.target.value
+                                            if (val < 0 || val === '') {
+                                                val = '0'
+                                            }
+                                            if (!val.includes('.')) {
+                                                val = Number(val)
+                                            }
+                                            val = `${val}`.match(/^\d+.?\d{0,2}/g)[0]
+                                            setFee(val)
+                                        }}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">$</InputAdornment>
                                         }}
                                     />
                                     <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>

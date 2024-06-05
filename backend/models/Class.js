@@ -54,6 +54,16 @@ const classSchema = new mongoose.Schema({
         type: String,
         default: "0"
     },
+    fee: {
+        type: Number,
+        default: 0,
+        get: (n) => {
+            return (n/100).toFixed(2);
+        },
+        set: (n) => {
+            return n*100;
+        }
+    },
     sponsor: {
         type: String,
         enum: [...sponsors, null],
@@ -62,6 +72,15 @@ const classSchema = new mongoose.Schema({
     trainer: {
         type: String,
         default: null
+    }
+}, {
+    toJSON: {
+        getters: true,
+        setters: true
+    },
+    toObject: {
+        getters: true,
+        setters: true
     }
 });
 

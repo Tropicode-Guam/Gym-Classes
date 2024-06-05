@@ -3,7 +3,10 @@
         "Insurance 1",
         "Insurance 2",
         "Insurance 3",
-        "Other Option in Insurance Dropdown"
+        {
+            "name": "Other Option in Insurance Dropdown",
+            "id_name": "Insurance Member ID Label Name"
+        }
     ],
     "Sponsors": [
         "Insurance 1",

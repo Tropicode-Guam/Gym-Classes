@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, Checkbox, FormControlLabel } from '@mui/material';
+import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, Checkbox, FormControlLabel, Dialog, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
@@ -10,9 +10,26 @@ import general from 'settings/general';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Collapse from '@mui/material/Collapse';
-insurances = insurances.Insurances
+const memberIDLabel = "Insurance Member ID"
+const INSURANCE_MAP = {}
+const SPONSORS_MAP = {}
+insurances.Sponsors.forEach(s => {
+    if (s.name) {
+        SPONSORS_MAP[s.name] = s
+    } else {
+        SPONSORS_MAP[s] = {name: s}
+    }    
+})
+insurances = insurances.Insurances.map(s => s.name && s || {name: s, id_name: memberIDLabel})
+insurances.forEach(({name, id_name}) => {
+    INSURANCE_MAP[name] = {
+        id_name,
+        also_free_for: SPONSORS_MAP[name] && SPONSORS_MAP[name].also_free_for
+    }
+})
 
 const API_BASE = process.env.REACT_APP_API;
+const FEE_MSG = general['Fee Message']
 
 const Landing = () => {
     const [classes, setClasses] = useState([]);
@@ -38,6 +55,8 @@ const Landing = () => {
         message: '',
         severity: 'success'
     })
+
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
     const theme = useTheme();
     const xs = useMediaQuery(theme.breakpoints.up('md'));
@@ -71,6 +90,7 @@ const Landing = () => {
     const handleClose = () => {
         setOpen(false);
         setSelectedClassItem(null);
+        setConfirmDialogOpen(false);
         resetFormData()
     };
 
@@ -101,27 +121,44 @@ const Landing = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (selectedClassItem.currentUsers >= selectedClassItem.size) {
+            enqueueSnackbar('Class is full!', { variant: 'error' });
+            return;
+        }
+
+        if (!formData.selectedDate) {
+            enqueueSnackbar('Please select a date', { variant: 'error' });
+            return;
+        }
+
+        if (hasGymMembership && !formData.gymMembership) {
+            enqueueSnackbar('Please enter your gym membership number', { variant: 'error' });
+            return
+        }
+
+        if (formData.insurance !== 'Other/None' && !formData.insuranceMemberId) {
+            enqueueSnackbar('Please enter your insurance member id', { variant: 'error' });
+            return
+        }
+
+        const freeFor = INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].also_free_for
+
+        if (!Number(selectedClassItem.fee) ||
+            selectedClassItem.sponsor === formData.insurance ||
+            hasGymMembership ||
+            freeFor === "all" ||
+            freeFor === formData.insurance ||
+            (Array.isArray(freeFor) && freeFor.includes(formData.insurance))
+        ) {
+            await createNewSignup()
+        } else {
+            setConfirmDialogOpen(true)
+        }
+    };
+
+    const createNewSignup = async () => {
         try {
-            if (selectedClassItem.currentUsers >= selectedClassItem.size) {
-                enqueueSnackbar('Class is full!', { variant: 'error' });
-                return;
-            }
-
-            if (!formData.selectedDate) {
-                enqueueSnackbar('Please select a date', { variant: 'error' });
-                return;
-            }
-
-            if (hasGymMembership && !formData.gymMembership) {
-                enqueueSnackbar('Please enter your gym membership number', { variant: 'error' });
-                return
-            }
-
-            if (formData.insurance === 'Other/None' && !formData.insuranceMemberId) {
-                enqueueSnackbar('Please enter your insurance member id', { variant: 'error' });
-                return
-            }
-
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
                 headers: {
@@ -365,7 +402,7 @@ const Landing = () => {
                                                 fullWidth
                                                 margin="normal"
                                             >
-                                                {insurances.map((insurance) => (
+                                                {insurances.map(({name: insurance}) => (
                                                     <MenuItem key={insurance} value={insurance}>{insurance}</MenuItem>
                                                 ))}
                                                 <MenuItem value="Other/None">Other/None</MenuItem>
@@ -373,7 +410,7 @@ const Landing = () => {
                                             <Collapse in={formData.insurance && formData.insurance !== "Other/None"}>
                                                 <TextField
                                                     disabled={classFull}
-                                                    label="Insurance Member ID"
+                                                    label={INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].id_name}
                                                     id="insuranceMemberId"
                                                     name="insuranceMemberId"
                                                     value={formData.insuranceMemberId}
@@ -396,6 +433,20 @@ const Landing = () => {
                     ))}
                 </Grid>
             </Container>
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={() => setConfirmDialogOpen(false)}
+            >
+                <DialogContent>
+                    <DialogContentText>
+                        {FEE_MSG.replace('{FEE}', selectedClassItem && selectedClassItem.fee)}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={() => createNewSignup()}>Agree</Button>
+                </DialogActions>
+            </Dialog>
             <Snackbar
                 open={snackbarState.open}
                 autoHideDuration={3000}
