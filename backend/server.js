@@ -279,6 +279,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       sponsor: req.body.sponsor || null,
       trainer: req.body.trainer || null,
       startDate: req.body.startDate,
+      endTime: req.body.endTime,
       endDate: req.body.endDate,
       size: req.body.size,
       fee: req.body.fee,
@@ -300,6 +301,10 @@ router.post('/classes', upload.single('image'), async (req, res) => {
 
     if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
       return res.status(400).json({ error: 'Start date must be before end date' });
+    }
+
+    if (new Date(opts.startDate) >= new Date(opts.endTime)) {
+      return res.status(400).json({ error: 'Start date must be before end time' });
     }
 
     const newClass = new Class(opts);
