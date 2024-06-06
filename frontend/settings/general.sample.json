@@ -1,3 +1,4 @@
 {
-    "Title": "Gym Classes"
+    "Title": "Gym Classes",
+    "Fee Message": "There will be a ${FEE} fee required at the door."
 }

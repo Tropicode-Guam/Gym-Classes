@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format, parseISO } from 'date-fns';
-import { ClassCard, ClassCardAction } from './ClassCard';
+import { ClassCard } from './ClassCard';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -144,15 +144,11 @@ function ClassList() {
                         <Grid container spacing={4}>
                             {classes.map((classItem) => (
                                 <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                                    <ClassCard classItem={classItem}>
-                                        <ClassCardAction>
-                                            <Button variant="contained" onClick={() => handleViewUsers(classItem._id)} sx={{
-                                                borderBottomLeftRadius: 100,
-                                            }}>View Users</Button>
-                                            <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </ClassCardAction>
+                                    <ClassCard classItem={classItem} maxModalWidth='1000px'>
+                                        <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
+                                        <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
+                                            <DeleteIcon />
+                                        </IconButton>
                                     </ClassCard>
                                 </Grid>
                             ))}
@@ -272,6 +268,7 @@ function ClassList() {
                                     <th style={{ width: '11%' }}>Here ✔️</th>
                                     <th>Name</th>
                                     <th>Phone</th>
+                                    <th style={{ width: '11%' }}>Gym Member</th>
                                     <th>Insurance</th>
                                 </tr>
                             </thead>
@@ -281,6 +278,7 @@ function ClassList() {
                                         <td></td>
                                         <td>{user.name}</td>
                                         <td>{user.phone}</td>
+                                        <td>{user.gymMembership && '✔️'}</td>
                                         <td>{user.insurance}</td>
                                     </tr>
                                 ))}

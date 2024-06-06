@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
-    CircularProgress, Snackbar, Alert, ButtonBase, Grid
+    CircularProgress, Snackbar, Alert, ButtonBase, Grid,
+    InputAdornment
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
-import { ClassCard, ClassCardAction } from './ClassCard';
+import { ClassCard } from './ClassCard';
+import insurances from 'settings/insurances';
+const sponsors = insurances.Sponsors.map(s => s.name || s);
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -54,12 +57,29 @@ function Admin() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [sponsor, setSponsor] = useState('None')
+    const [trainer, setTrainer] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [endTime, setEndTime] = useState('');
     const [size, setSize] = useState('');
+    const [fee, setFee] = useState(0);
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
+    let endTimeBeforeStart = false
+    let endDateTime = ''
+    if (startDate && endTime) {
+        let edt = new Date(startDate)
+        edt.setUTCHours(...endTime.split(':'))
+        endDateTime = edt.toISOString().slice(0,-1)
+        endTimeBeforeStart = new Date(endDateTime) <= new Date(startDate)
+        if (endTimeBeforeStart) {
+            edt.setDate(edt.getDate() + 1)
+            endDateTime = edt.toISOString().slice(0,-1)
+        }
+    }
 
     const [color, setColor] = useState('');
     const theme = useTheme();
@@ -85,7 +105,9 @@ function Admin() {
         Friday: false,
         Saturday: false,
     });
+    const DEFAULT_DAYS_PRIOR_CAN_SIGN_UP = 2
     const [frequency, setFrequency] = useState('none');
+    const [daysPriorCanSignUp, setDaysPriorCanSignUp] = useState(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
 
     // Define the error state variables
     const [errorMsg, setErrorMsg] = useState('');
@@ -97,13 +119,32 @@ function Admin() {
 
     const dayOfWeek = getDOWFromDateString(startDate)
 
+    const getDaysAsNumbers = () => {
+        const dayMapping = {
+            Sunday: 0,
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+        };
+
+        return Object.entries(days)
+            .filter(([day, isSelected]) => isSelected)
+            .map(([day]) => dayMapping[day]);
+    };
+
     const previewClassItem = {
         title: title,
         description: description,
+        sponsor: sponsor === 'None' ? '' : sponsor,
+        trainer: trainer,
         startDate: startDate,
+        endTime: endDateTime,
         endDate: endDate,
         frequency: frequency,
-        days: days,
+        days: getDaysAsNumbers(),
         imageUrl: imagePreviewUrl,
         imageType: imageType,
         size: size,
@@ -148,7 +189,7 @@ function Admin() {
         event.preventDefault();
         setLoading(true);
 
-        if ([title, description, startDate, size, image].some(field => !field)) {
+        if ([title, description, startDate, endTime, size, image].some(field => !field)) {
             setErrorMsg('Missing required fields');
             setShowRequiredFields(true)
             setErrorOpen(true);
@@ -167,13 +208,18 @@ function Admin() {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('startDate', startDate);
-        formData.append('endDate', endDate);
+        formData.append('sponsor', sponsor === 'None' ? '' : sponsor);
+        formData.append('trainer', trainer);
+        formData.append('startDate', new Date(startDate).toISOString());
+        formData.append('endTime', new Date(endDateTime).toISOString());
+        formData.append('endDate', endDate && new Date(endDate).toISOString());
         formData.append('size', size);
         formData.append('image', image);
+        formData.append('fee', fee);
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));
         formData.append('frequency', frequency);
+        formData.append('daysPriorCanSignUp', daysPriorCanSignUp);
         formData.append('color', color);
         formData.append('key', authKey); // Include the key in the request body
 
@@ -186,9 +232,13 @@ function Admin() {
             if (response.ok) {
                 setTitle('');
                 setDescription('');
+                setSponsor('None');
+                setTrainer('');
                 setStartDate('');
+                setEndTime('');
                 setEndDate('');
                 setSize('');
+                setFee(0);
                 setImage(null);
                 setImageType(null);
                 setImagePreviewUrl(null); // Reset image preview URL
@@ -202,6 +252,7 @@ function Admin() {
                     Saturday: false,
                 });
                 setFrequency('none');
+                setDaysPriorCanSignUp(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
                 setColor(chooseRandomColor());
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
@@ -253,21 +304,6 @@ function Admin() {
         }
     };
 
-    const getDaysAsNumbers = () => {
-        const dayMapping = {
-            Sunday: 0,
-            Monday: 1,
-            Tuesday: 2,
-            Wednesday: 3,
-            Thursday: 4,
-            Friday: 5,
-            Saturday: 6,
-        };
-
-        return Object.entries(days)
-            .filter(([day, isSelected]) => isSelected)
-            .map(([day]) => dayMapping[day]);
-    };
 
     const fetchSignups = async () => {
         try {
@@ -344,7 +380,32 @@ function Admin() {
                                         onChange={(e) => setDescription(e.target.value)}
                                     />
                                     <TextField
-                                        label="Start Date"
+                                        select
+                                        displayEmpty
+                                        label="Sponsor"
+                                        id="sponsor"
+                                        name="sponsor"
+                                        value={sponsor}
+                                        onChange={(e) => setSponsor(e.target.value)}
+                                        required
+                                        fullWidth
+                                        margin="normal"
+                                    >
+                                        <MenuItem value={'None'}>None</MenuItem>
+                                        {sponsors.map((sp) => (
+                                            <MenuItem key={sp} value={sp}>{sp}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <TextField
+                                        label="Trainer"
+                                        fullWidth
+                                        margin="normal"
+                                        value={trainer}
+                                        onChange={(e) => setTrainer(e.target.value)}
+                                    >
+                                    </TextField>
+                                    <TextField
+                                        label="Start Date and Time"
                                         required
                                         error={showRequiredFields && !startDate}
                                         type="datetime-local"
@@ -371,13 +432,45 @@ function Admin() {
                                         }}
                                     />
                                     <TextField
+                                        label="End Time"
+                                        type="time"
+                                        inputProps={{
+                                            inputMode: "24hours"
+                                        }}
+                                        required
+                                        helperText={endTimeBeforeStart && "End time is start time or before. This will be interpreted as the class going into the next day"}
+                                        error={endTimeBeforeStart || (showRequiredFields && !endTime)}
+                                        fullWidth
+                                        margin="normal"
+                                        InputLabelProps={{ shrink: true }}
+                                        value={endTime}
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                    />
+                                    <TextField
                                         label="End Date"
-                                        type="datetime-local"
+                                        type="date"
                                         fullWidth
                                         margin="normal"
                                         InputLabelProps={{ shrink: true }}
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                    <TextField
+                                        label="Users can sign up this many days prior to the class"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        required
+                                        fullWidth
+                                        helperText="* Set to 0 to allow signups for any future class"
+                                        margin="normal"
+                                        value={daysPriorCanSignUp}
+                                        onChange={(e) => {
+                                            let val = e.target.value;
+                                            if (val < 0 || val === '') {
+                                                val = 0
+                                            }
+                                            setDaysPriorCanSignUp(val)
+                                        }}
                                     />
                                     <TextField
                                         label="Max Class Size"
@@ -396,6 +489,30 @@ function Admin() {
                                             setSize(val)
                                         }}
                                     />
+                                    <TextField
+                                        label="Fee"
+                                        type="number"
+                                        inputProps={{ min: 0 }}
+                                        required
+                                        error={showRequiredFields && fee === ''}
+                                        fullWidth
+                                        margin="normal"
+                                        value={fee}
+                                        onChange={(e) => {
+                                            let val = e.target.value
+                                            if (val < 0 || val === '') {
+                                                val = '0'
+                                            }
+                                            if (!val.includes('.')) {
+                                                val = Number(val)
+                                            }
+                                            val = `${val}`.match(/^\d+.?\d{0,2}/g)[0]
+                                            setFee(val)
+                                        }}
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                        }}
+                                    />
                                     <Button variant="contained" component="label" sx={{ mt: 2, mb: 2 }}>
                                         Upload Image
                                         <input key={imagePreviewUrl} type="file" hidden onChange={handleImageChange} />
@@ -403,7 +520,7 @@ function Admin() {
                                     <Typography variant="h6" component="h2">
                                         Repeat Frequency
                                     </Typography>
-                                    <FormControl fullWidth margin="normal">
+                                    <FormControl required fullWidth margin="normal">
                                         <InputLabel id="frequency-label">Frequency</InputLabel>
                                         <Select
                                             labelId="frequency-label"

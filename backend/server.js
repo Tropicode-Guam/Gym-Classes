@@ -206,9 +206,21 @@ const upload = multer({
   }
 });
 
+const withinDaysBeforeClass = (classItem, date) => {
+  if (!classItem.daysPriorCanSignUp) {
+      return true
+  }
+  const today = new Date()
+  today.setHours(0,0,0,0)
+  const current = new Date(date)
+  const diff = current - today
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  return days <= classItem.daysPriorCanSignUp
+}
+
 router.post('/signup', async (req, res) => {
   try {
-    const { name, phone, insurance, selectedDate, selectedClass } = req.body;
+    const { name, phone, gymMembership, insurance, insuranceMemberId, selectedDate, selectedClass } = req.body;
     const classObj = await Class.findById(selectedClass);
 
     // check class and date to ensure they're valid
@@ -225,6 +237,14 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Date isn\'t a class date' });
     }
 
+    if (!withinDaysBeforeClass(classObj, selectedDate)) {
+      return res.status(400).json({error: `This class doesn't accept signups more than ${classObj.daysPriorCanSignUp} days in advance`})
+    }
+
+    if (insurance !== 'Other/None' && !insuranceMemberId) {
+      return res.status(400).json({error: `a member id is required for ${insurance}`})
+    }
+
     const signups = await SignUp.find({
       selectedClass,
       selectedDate: {
@@ -237,7 +257,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Class is full' });
     }
 
-    const signupData = { name, phone, insurance, selectedDate, selectedClass };
+    const signupData = { name, phone, gymMembership, insurance, insuranceMemberId, selectedDate, selectedClass };
     const signup = new SignUp(signupData);
     await signup.save();
     res.status(201).json({ message: 'User signed up successfully!', signupData });
@@ -256,11 +276,16 @@ router.post('/classes', upload.single('image'), async (req, res) => {
     const opts = {
       title: req.body.title,
       description: req.body.description,
+      sponsor: req.body.sponsor || null,
+      trainer: req.body.trainer || null,
       startDate: req.body.startDate,
+      endTime: req.body.endTime,
       endDate: req.body.endDate,
       size: req.body.size,
+      fee: req.body.fee,
       image: req.file ? req.file.buffer : undefined,
       imageType: req.file ? req.file.mimetype : undefined,
+      daysPriorCanSignUp: req.body.daysPriorCanSignUp,
       days: JSON.parse(req.body.days),
       color: req.body.color,
       frequency: req.body.frequency,
@@ -276,6 +301,10 @@ router.post('/classes', upload.single('image'), async (req, res) => {
 
     if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
       return res.status(400).json({ error: 'Start date must be before end date' });
+    }
+
+    if (new Date(opts.startDate) >= new Date(opts.endTime)) {
+      return res.status(400).json({ error: 'Start date must be before end time' });
     }
 
     const newClass = new Class(opts);
@@ -315,11 +344,13 @@ router.get('/signups', async (req, res) => {
     }
     const signups = await SignUp.find(filter).sort({ selectedDate: -1 });
     const csvData = [
-      ['Name', 'Phone', 'Insurance', 'Selected Date', 'Selected Class'],
+      ['Name', 'Phone', 'Gym Membership', 'Insurance', 'Insurance Member ID', 'Selected Date', 'Selected Class'],
       ...signups.map(signup => [
         signup.name,
         signup.phone,
+        signup.gymMembership,
         signup.insurance,
+        signup.insuranceMemberId,
         signup.selectedDate.toLocaleDateString(),
         classesMap[signup.selectedClass] && classesMap[signup.selectedClass].title || 'Deleted Class'
       ])

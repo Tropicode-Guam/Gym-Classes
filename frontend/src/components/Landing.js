@@ -1,28 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Box, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, IconButton } from '@mui/material';
+import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, Checkbox, FormControlLabel, Dialog, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
-import { tzAgnosticDate } from '../utils';
-import { ClassCard, ClassCardAction } from './ClassCard';
+import { ClassCard } from './ClassCard';
 import insurances from 'settings/insurances';
 import general from 'settings/general';
-import CloseIcon from '@mui/icons-material/Close';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Collapse from '@mui/material/Collapse';
+const memberIDLabel = "Insurance Member ID"
+const INSURANCE_MAP = {}
+const SPONSORS_MAP = {}
+insurances.Sponsors.forEach(s => {
+    if (s.name) {
+        SPONSORS_MAP[s.name] = s
+    } else {
+        SPONSORS_MAP[s] = {name: s}
+    }    
+})
+insurances = insurances.Insurances.map(s => s.name && s || {name: s, id_name: memberIDLabel})
+insurances.forEach(({name, id_name}) => {
+    INSURANCE_MAP[name] = {
+        id_name,
+        also_free_for: SPONSORS_MAP[name] && SPONSORS_MAP[name].also_free_for
+    }
+})
 
 const API_BASE = process.env.REACT_APP_API;
+const FEE_MSG = general['Fee Message']
 
 const Landing = () => {
     const [classes, setClasses] = useState([]);
     const [error, setError] = useState(null);
     const [open, setOpen] = useState(false);
     const [selectedClassItem, setSelectedClassItem] = useState(null);
-    const [formData, setFormData] = useState({
+    const emptyFormData = {
         name: '',
         phone: '',
+        gymMembership: '',
         insurance: '',
+        insuranceMemberId: '',
         selectedDate: '',
         selectedClass: ''
-    });
+    }
+    const [formData, setFormData] = useState({...emptyFormData});
+    const [hasGymMembership, setHasGymMembership] = useState(false);
     const [loading, setLoading] = useState(true);
     const [numParticipants, setNumParticipants] = useState(0);
 
@@ -31,6 +54,16 @@ const Landing = () => {
         message: '',
         severity: 'success'
     })
+
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+    const theme = useTheme();
+    const xs = useMediaQuery(theme.breakpoints.up('md'));
+
+    const resetFormData = () => {
+        setHasGymMembership(false);
+        setFormData({...emptyFormData})
+    }
 
     const classFull = numParticipants >= ((selectedClassItem && selectedClassItem.size) || 0);
 
@@ -56,25 +89,8 @@ const Landing = () => {
     const handleClose = () => {
         setOpen(false);
         setSelectedClassItem(null);
-        setFormData({
-            name: '',
-            phone: '',
-            insurance: '',
-            selectedDate: '',
-            selectedClass: ''
-        });
-    };
-
-    const style = {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 400,
-        bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
+        setConfirmDialogOpen(false);
+        resetFormData()
     };
 
     const fetchClasses = async () => {
@@ -85,10 +101,6 @@ const Landing = () => {
             }
             const classData = await response.json();
 
-            classData.forEach(classItem => {
-                classItem.startDate = tzAgnosticDate(classItem.startDate).toISOString();
-                classItem.endDate = classItem.endDate && tzAgnosticDate(classItem.endDate).toISOString();
-            });
             setClasses(classData);
         } catch (error) {
             setError(`Error fetching classes: ${error.message}`);
@@ -104,17 +116,44 @@ const Landing = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (selectedClassItem.currentUsers >= selectedClassItem.size) {
+            enqueueSnackbar('Class is full!', { variant: 'error' });
+            return;
+        }
+
+        if (!formData.selectedDate) {
+            enqueueSnackbar('Please select a date', { variant: 'error' });
+            return;
+        }
+
+        if (hasGymMembership && !formData.gymMembership) {
+            enqueueSnackbar('Please enter your gym membership number', { variant: 'error' });
+            return
+        }
+
+        if (formData.insurance !== 'Other/None' && !formData.insuranceMemberId) {
+            enqueueSnackbar('Please enter your insurance member id', { variant: 'error' });
+            return
+        }
+
+        const freeFor = INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].also_free_for
+
+        if (!Number(selectedClassItem.fee) ||
+            selectedClassItem.sponsor === formData.insurance ||
+            hasGymMembership ||
+            freeFor === "all" ||
+            freeFor === formData.insurance ||
+            (Array.isArray(freeFor) && freeFor.includes(formData.insurance))
+        ) {
+            await createNewSignup()
+        } else {
+            setConfirmDialogOpen(true)
+        }
+    };
+
+    const createNewSignup = async () => {
         try {
-            if (selectedClassItem.currentUsers >= selectedClassItem.size) {
-                enqueueSnackbar('Class is full!', { variant: 'error' });
-                return;
-            }
-
-            if (!formData.selectedDate) {
-                enqueueSnackbar('Please select a date', { variant: 'error' });
-                return;
-            }
-
             const response = await fetch(`${API_BASE}/signup`, {
                 method: 'POST',
                 headers: {
@@ -170,6 +209,12 @@ const Landing = () => {
         if (event.target.name === "phone") {
             val = scrubPhoneNumber(val)
         }
+        if (event.target.name === "insurance" && val === 'Other/None') {
+            setFormData({
+                ...formData,
+                insuranceMemberId: ''
+            })
+        }
         setFormData({
             ...formData,
             [event.target.name]: val || ''
@@ -177,6 +222,10 @@ const Landing = () => {
     };
 
     const handleDateChange = (date) => {
+        if (!withinDaysBeforeClass(selectedClassItem, date)) {
+            enqueueSnackbar(`You can only sign up ${selectedClassItem.daysPriorCanSignUp} days in advance for this class`, { variant: 'error' })
+            return
+        }
         fetchUserCount(selectedClassItem, date);
         setFormData({
             ...formData,
@@ -218,6 +267,18 @@ const Landing = () => {
         }
     };
 
+    const withinDaysBeforeClass = (classItem, date) => {
+        if (!classItem.daysPriorCanSignUp) {
+            return true
+        }
+        const today = new Date()
+        today.setHours(0,0,0,0)
+        const current = new Date(date)
+        const diff = current - today
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        return days <= classItem.daysPriorCanSignUp
+    }
+
     useEffect(() => {
         fetchClasses().then(() => {
             setLoading(false);
@@ -234,88 +295,153 @@ const Landing = () => {
                 <Grid container spacing={1}>
                     {classes.map((classItem) => (
                         <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                            <ClassCard classItem={classItem} onClick={() => handleOpen(classItem)}>
+                            <ClassCard 
+                                open={classItem === selectedClassItem && open}
+                                classItem={classItem} 
+                                onOpen={() => {handleOpen(classItem)}}
+                                onClose={handleClose}
+                                maxModalWidth='1000px'
+                            >
+                                <form onSubmit={handleSubmit}>
+                                    <Grid container spacing={4}>
+                                        <Grid item xs={12} md={6} order={(xs && 2) || 1}>
+                                            <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
+                                            <Calendar
+                                                value={formData.selectedDate}
+                                                calendarType='gregory'
+                                                tileDisabled={({ date }) => !isThisAClassDay(date, classItem)}
+                                                onChange={handleDateChange}
+                                                minDetail="month"
+                                                formatDay={(locale, date) => {
+                                                    const s = format(date, 'd');
+                                                    if (classItem.daysPriorCanSignUp) {
+                                                        const today = new Date()
+                                                        today.setHours(0,0,0,0)
+                                                        const current = new Date(date)
+
+                                                        if (withinDaysBeforeClass(classItem, date) && current >= today) {
+                                                            return <Typography variant="body2" sx={{fontWeight: 'bold', color: 'green'}}>{s}</Typography>
+                                                        } else {
+                                                            return <Typography variant="body2" sx={{color: theme.palette.grey[500]}}>{s}</Typography>
+                                                        }
+                                                    } else {
+                                                        return <Typography variant="body2" sx={{fontWeight: 'bold', color: theme.palette.grey[500]}}>{s}</Typography>
+                                                    }
+                                                }}
+                                            />
+                                            {classItem.daysPriorCanSignUp !== 0 && <Typography variant="body1" sx={{color: 'green'}}>You can only sign up {classItem.daysPriorCanSignUp} days before the class</Typography>}
+                                            {classFull && <Typography id="modal-modal-title" variant="h6" component="h2">Class full</Typography>}
+                                            {numParticipants}/{classItem.size} Participants
+                                        </Grid>
+                                        <Grid item xs={12} md={6} order={(xs && 1) || 2}>
+                                            <Typography id="modal-modal-title" variant="h6" component="h2">Sign Up</Typography>
+                                            <TextField
+                                                disabled={classFull}
+                                                label="Name"
+                                                id="name"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleInputChange}
+                                                required
+                                                fullWidth
+                                                margin="normal"
+                                            />
+                                            <TextField
+                                                disabled={classFull}
+                                                label="Phone Number"
+                                                id="phone"
+                                                name="phone"
+                                                type="tel"
+                                                value={formData.phone}
+                                                onChange={handleInputChange}
+                                                required
+                                                fullWidth
+                                                margin="normal"
+                                                placeholder="(XXX) XXX-XXXX"
+                                            />
+                                            <FormControlLabel control={
+                                                <Checkbox 
+                                                    disabled={classFull}
+                                                    checked={hasGymMembership} 
+                                                    onChange={(e) => {
+                                                        const val = e.target.checked
+                                                        setHasGymMembership(val);
+                                                        if (!val) {
+                                                            setFormData({...formData, gymMembership: ''})
+                                                        }
+                                                    }
+                                                } />
+                                            } label="I have a gym membership" />
+                                            <Collapse in={hasGymMembership}>
+                                                <TextField
+                                                    disabled={classFull}
+                                                    label="Gym Membership Number"
+                                                    id="gymMembership"
+                                                    name="gymMembership"
+                                                    value={formData.gymMembership}
+                                                    onChange={handleInputChange}
+                                                    required={hasGymMembership}
+                                                    fullWidth
+                                                    margin="normal"
+                                                />
+                                            </Collapse>
+                                            <TextField
+                                                select
+                                                disabled={classFull}
+                                                label="Insurance"
+                                                id="insurance"
+                                                name="insurance"
+                                                value={formData.insurance}
+                                                onChange={handleInputChange}
+                                                required
+                                                fullWidth
+                                                margin="normal"
+                                            >
+                                                {insurances.map(({name: insurance}) => (
+                                                    <MenuItem key={insurance} value={insurance}>{insurance}</MenuItem>
+                                                ))}
+                                                <MenuItem value="Other/None">Other/None</MenuItem>
+                                            </TextField>
+                                            <Collapse in={formData.insurance && formData.insurance !== "Other/None"}>
+                                                <TextField
+                                                    disabled={classFull}
+                                                    label={INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].id_name}
+                                                    id="insuranceMemberId"
+                                                    name="insuranceMemberId"
+                                                    value={formData.insuranceMemberId}
+                                                    onChange={handleInputChange}
+                                                    required={formData.insurance && formData.insurance !== "Other/None"}
+                                                    fullWidth
+                                                    margin="normal"
+                                                />
+                                            </Collapse>
+                                            <input type="hidden" name="selectedDate" value={formData.selectedDate} />
+                                            <input type="hidden" name="selectedClass" value={formData.selectedClass} />
+                                        </Grid>
+                                        <Grid container item xs={12} order={3} justifyContent="center">
+                                            <Button type="submit" variant="contained" color="primary" disabled={classFull || formData.selectedDate === ''}>Submit</Button>
+                                        </Grid>
+                                    </Grid>
+                                </form>
                             </ClassCard>
                         </Grid>
                     ))}
                 </Grid>
             </Container>
-            {selectedClassItem && (
-                <Modal
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box sx={style}>
-                        <Typography id="modal-modal-title" variant="h6" component="h2">Select a Date</Typography>
-                        <IconButton
-                            aria-label="close"
-                            onClick={handleClose}
-                            sx={{
-                                position: 'absolute',
-                                right: 8,
-                                top: 8,
-                                color: (theme) => theme.palette.grey[500],
-                            }}
-                            >
-                            <CloseIcon />
-                        </IconButton>
-                        <Calendar
-                            tileDisabled={({ date }) => !isThisAClassDay(date, selectedClassItem)}
-                            onChange={handleDateChange}
-                        />
-                        {classFull && <Typography id="modal-modal-title" variant="h6" component="h2">Class full</Typography>}
-                        {numParticipants}/{selectedClassItem.size} Participants
-                        <form onSubmit={handleSubmit}>
-                            <TextField
-                                disabled={classFull}
-                                label="Name"
-                                id="name"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                required
-                                fullWidth
-                                margin="normal"
-                            />
-                            <TextField
-                                disabled={classFull}
-                                label="Phone Number"
-                                id="phone"
-                                name="phone"
-                                type="tel"
-                                value={formData.phone}
-                                onChange={handleInputChange}
-                                required
-                                fullWidth
-                                margin="normal"
-                                placeholder="(XXX) XXX-XXXX"
-                            />
-                            <TextField
-                                select
-                                disabled={classFull}
-                                label="Insurance"
-                                id="insurance"
-                                name="insurance"
-                                value={formData.insurance}
-                                onChange={handleInputChange}
-                                required
-                                fullWidth
-                                margin="normal"
-                            >
-                                {insurances.map((insurance) => (
-                                    <MenuItem key={insurance} value={insurance}>{insurance}</MenuItem>
-                                ))}
-                                <MenuItem value="Other/None">Other/None</MenuItem>
-                            </TextField>
-                            <input type="hidden" name="selectedDate" value={formData.selectedDate} />
-                            <input type="hidden" name="selectedClass" value={formData.selectedClass} />
-                            <Button type="submit" variant="contained" color="primary" disabled={classFull}>Submit</Button>
-                        </form>
-                    </Box>
-                </Modal>
-            )}
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={() => setConfirmDialogOpen(false)}
+            >
+                <DialogContent>
+                    <DialogContentText>
+                        {FEE_MSG.replace('{FEE}', selectedClassItem && selectedClassItem.fee)}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={() => createNewSignup()}>Agree</Button>
+                </DialogActions>
+            </Dialog>
             <Snackbar
                 open={snackbarState.open}
                 autoHideDuration={3000}
