@@ -3,7 +3,6 @@ import { Button, Typography, TextField, Container, Grid, CircularProgress, Snack
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
-import { tzAgnosticDate } from '../utils';
 import { ClassCard } from './ClassCard';
 import insurances from 'settings/insurances';
 import general from 'settings/general';
@@ -102,10 +101,6 @@ const Landing = () => {
             }
             const classData = await response.json();
 
-            classData.forEach(classItem => {
-                classItem.startDate = tzAgnosticDate(classItem.startDate).toISOString();
-                classItem.endDate = classItem.endDate && tzAgnosticDate(classItem.endDate).toISOString();
-            });
             setClasses(classData);
         } catch (error) {
             setError(`Error fetching classes: ${error.message}`);
