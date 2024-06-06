@@ -210,7 +210,9 @@ function Admin() {
         formData.append('description', description);
         formData.append('sponsor', sponsor === 'None' ? '' : sponsor);
         formData.append('trainer', trainer);
+        formData.append('startDate', startDate);
         formData.append('endTime', endDateTime);
+        formData.append('endDate', endDate);
         formData.append('size', size);
         formData.append('image', image);
         formData.append('fee', fee);
