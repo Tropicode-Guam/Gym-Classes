@@ -161,7 +161,11 @@ export function ClassCard(props) {
                         justifyContent: 'space-between'
                     }}> */}
                         <Typography variant="h5" display="inline">{classItem.title} | </Typography>
-                        <Typography variant="body1" display="inline">{freqDisp}</Typography>
+                        <Typography variant="body1" display="inline">{freqDisp} from {
+                            classItem.startDate ? format(parseISO(classItem.startDate), 'h:mmaaa') : "0:00am"
+                        } - {
+                            classItem.endTime   ? format(parseISO(classItem.endTime),   'h:mmaaa') : "0:00am"
+                        }</Typography>
                     {/* </Box> */}
                     {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     {classItem.trainer && <Typography variant="body1">Hosted by {classItem.trainer}</Typography>}

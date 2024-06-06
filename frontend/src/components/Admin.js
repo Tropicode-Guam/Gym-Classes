@@ -61,11 +61,25 @@ function Admin() {
     const [trainer, setTrainer] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [endTime, setEndTime] = useState('');
     const [size, setSize] = useState('');
     const [fee, setFee] = useState(0);
     const [image, setImage] = useState(null);
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
+    let endTimeBeforeStart = false
+    let endDateTime = ''
+    if (startDate && endTime) {
+        let edt = new Date(startDate)
+        edt.setUTCHours(...endTime.split(':'))
+        endDateTime = edt.toISOString().slice(0,-1)
+        endTimeBeforeStart = new Date(endDateTime) <= new Date(startDate)
+        if (endTimeBeforeStart) {
+            edt.setDate(edt.getDate() + 1)
+            endDateTime = edt.toISOString().slice(0,-1)
+        }
+    }
 
     const [color, setColor] = useState('');
     const theme = useTheme();
@@ -127,6 +141,7 @@ function Admin() {
         sponsor: sponsor === 'None' ? '' : sponsor,
         trainer: trainer,
         startDate: startDate,
+        endTime: endDateTime,
         endDate: endDate,
         frequency: frequency,
         days: getDaysAsNumbers(),
@@ -174,7 +189,7 @@ function Admin() {
         event.preventDefault();
         setLoading(true);
 
-        if ([title, description, startDate, size, image].some(field => !field)) {
+        if ([title, description, startDate, endTime, size, image].some(field => !field)) {
             setErrorMsg('Missing required fields');
             setShowRequiredFields(true)
             setErrorOpen(true);
@@ -194,9 +209,7 @@ function Admin() {
         formData.append('title', title);
         formData.append('description', description);
         formData.append('sponsor', sponsor === 'None' ? '' : sponsor);
-        formData.append('trainer', trainer || null);
-        formData.append('startDate', startDate);
-        formData.append('endDate', endDate);
+        formData.append('endTime', endDateTime);
         formData.append('size', size);
         formData.append('image', image);
         formData.append('fee', fee);
@@ -219,6 +232,7 @@ function Admin() {
                 setSponsor('None');
                 setTrainer('');
                 setStartDate('');
+                setEndTime('');
                 setEndDate('');
                 setSize('');
                 setFee(0);
@@ -388,7 +402,7 @@ function Admin() {
                                     >
                                     </TextField>
                                     <TextField
-                                        label="Start Date"
+                                        label="Start Date and Time"
                                         required
                                         error={showRequiredFields && !startDate}
                                         type="datetime-local"
@@ -415,8 +429,23 @@ function Admin() {
                                         }}
                                     />
                                     <TextField
+                                        label="End Time"
+                                        type="time"
+                                        inputProps={{
+                                            inputMode: "24hours"
+                                        }}
+                                        required
+                                        helperText={endTimeBeforeStart && "End time is start time or before. This will be interpreted as the class going into the next day"}
+                                        error={endTimeBeforeStart || (showRequiredFields && !endTime)}
+                                        fullWidth
+                                        margin="normal"
+                                        InputLabelProps={{ shrink: true }}
+                                        value={endTime}
+                                        onChange={(e) => setEndTime(e.target.value)}
+                                    />
+                                    <TextField
                                         label="End Date"
-                                        type="datetime-local"
+                                        type="date"
                                         fullWidth
                                         margin="normal"
                                         InputLabelProps={{ shrink: true }}
