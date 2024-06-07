@@ -88,7 +88,18 @@ router.get('/', (req, res) => {
 // Define the GET endpoint for fetching classes
 router.get('/classes', async (req, res) => {
   try {
-    const classes = await Class.find({}).select('-image');
+    const yesterday = new Date()
+    yesterday.setHours(0,0,0,0)
+    yesterday.setDate(yesterday.getDate() - 1)
+    let query = {$or: [
+                  {endDate: {$gte: yesterday}}, 
+                  {endDate: {$exists: false}}, 
+                  {endDate: null}
+                ]}
+    if (req.query.all != null) {
+      query = {}
+    }
+    const classes = await Class.find(query).select('-image').sort({createdAt:-1});
     res.json(classes);
   } catch (error) {
     console.error('Error fetching classes:', error);

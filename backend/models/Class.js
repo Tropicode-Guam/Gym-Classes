@@ -85,7 +85,8 @@ const classSchema = new mongoose.Schema({
     toObject: {
         getters: true,
         setters: true
-    }
+    },
+    timestamps: true
 });
 
 const Class = mongoose.model('Class', classSchema);
