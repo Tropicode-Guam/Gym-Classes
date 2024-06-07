@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import {
     Button, Modal, Typography, Box, List, ListItem, ListItemText,
@@ -7,41 +7,21 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format, parseISO } from 'date-fns';
 import { ClassCard } from './ClassCard';
+import { OnlyOngoingContext } from '../Contexts';
+import { useGetClassesQuery } from '../slices/classesSlice';
 
 const API_BASE = process.env.REACT_APP_API;
 
 function ClassList() {
-    const [classes, setClasses] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const onlyOngoing = useContext(OnlyOngoingContext);
+    const { data: classes, isLoading: loading, error, refetch: refetchClasses } = useGetClassesQuery(onlyOngoing);
+
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [classDates, setClassDates] = useState([]);
     const [selectedClassDate, setSelectedClassDate] = useState('');
-
-    const getClasses = async () => {
-        try {
-            const response = await axios.get(`${API_BASE}/classes`);
-            if (response.status === 200) {
-                const classData = response.data;
-
-                const classesWithUserCount = await Promise.all(classData.map(async (classItem) => {
-                    const userResponse = await axios.get(`${API_BASE}/classes/${classItem._id}/users`);
-                    const userCount = userResponse.data.length;
-                    return { ...classItem, currentUsers: userCount };
-                }));
-
-                return classesWithUserCount;
-            } else {
-                console.error('Error fetching classes:', response.status);
-                return [];
-            }
-        } catch (error) {
-            console.error('Error fetching classes:', error);
-            return [];
-        }
-    };
 
     const handleViewUsers = async (classId) => {
         const selectedClassItem = classes.find((classItem) => classItem._id === classId);
@@ -103,8 +83,7 @@ function ClassList() {
         try {
             const response = await axios.delete(`${API_BASE}/classes/${classId}`);
             if (response.status === 200) {
-                const updatedClasses = await getClasses();
-                setClasses(updatedClasses);
+                await refetchClasses();
             } else {
                 console.error('Error deleting class:', response.status);
             }
@@ -118,29 +97,17 @@ function ClassList() {
         setShowDeleteModal(true);
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const classesData = await getClasses();
-                setClasses(classesData);
-            } catch (error) {
-                console.error('Error fetching classes:', error);
-            }
-            setLoading(false);
-        };
-        fetchData();
-    }, []);
-
     return (
         <div>
             <Typography variant="h4" gutterBottom sx={{ marginTop: 4 }}>Class List</Typography>
+            {error && <Typography color="error">Error fetching classes: {error.error}</Typography>}
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <CircularProgress />
                 </Box>
             ) : (
                 <>
-                    {classes.length > 0 ? (
+                    {classes && classes.length > 0 ? (
                         <Grid container spacing={4}>
                             {classes.map((classItem) => (
                                 <Grid item xs={12} sm={6} md={4} key={classItem._id}>

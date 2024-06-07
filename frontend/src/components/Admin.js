@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
@@ -9,6 +9,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
 import ClassList from './ClassList';
 import { ClassCard } from './ClassCard';
+import { OnlyOngoingContext } from '../Contexts';
+import { useGetClassesQuery } from '../slices/classesSlice';
 import insurances from 'settings/insurances';
 const sponsors = insurances.Sponsors.map(s => s.name || s);
 
@@ -68,6 +70,9 @@ function Admin() {
     const [imageType, setImageType] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
+    const onlyOngoing = useContext(OnlyOngoingContext);
+    const { refetch: refetchClasses } = useGetClassesQuery(onlyOngoing);
+
     let endTimeBeforeStart = false
     let endDateTime = ''
     if (startDate && endTime) {
@@ -112,8 +117,6 @@ function Admin() {
     // Define the error state variables
     const [errorMsg, setErrorMsg] = useState('');
     const [errorOpen, setErrorOpen] = useState(false);
-
-    const [renderKey, setRenderKey] = useState(0);
 
     const[showRequiredFields, setShowRequiredFields] = useState(false);
 
@@ -276,7 +279,7 @@ function Admin() {
             console.error('Request failed:', error);
         } finally {
             setLoading(false);
-            setRenderKey(renderKey + 1);
+            refetchClasses()
             setShowRequiredFields(false);
         }
     };
@@ -612,11 +615,7 @@ function Admin() {
                         </Grid>
                     </Container>
                     <Container>
-                        <ClassList
-                            // rerenders the whole component
-                            // but lazy to pull state up to this level
-                            key={renderKey}
-                        />
+                        <ClassList/>
                     </Container>
                     <Button
                         variant="contained"

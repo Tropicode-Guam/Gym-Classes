@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Button, Typography, TextField, Container, Grid, CircularProgress, Snackbar, Alert, MenuItem, Checkbox, FormControlLabel, Dialog, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -9,6 +9,9 @@ import general from 'settings/general';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Collapse from '@mui/material/Collapse';
+import { OnlyOngoingContext } from '../Contexts';
+import { useGetClassesQuery } from '../slices/classesSlice';
+
 const memberIDLabel = "Insurance Member ID"
 const INSURANCE_MAP = {}
 const SPONSORS_MAP = {}
@@ -31,8 +34,8 @@ const API_BASE = process.env.REACT_APP_API;
 const FEE_MSG = general['Fee Message']
 
 const Landing = () => {
-    const [classes, setClasses] = useState([]);
-    const [error, setError] = useState(null);
+    const onlyOngoing = useContext(OnlyOngoingContext);
+    const { data: classes, isLoading: loading, error } = useGetClassesQuery(onlyOngoing);
     const [open, setOpen] = useState(false);
     const [selectedClassItem, setSelectedClassItem] = useState(null);
     const emptyFormData = {
@@ -46,7 +49,6 @@ const Landing = () => {
     }
     const [formData, setFormData] = useState({...emptyFormData});
     const [hasGymMembership, setHasGymMembership] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [numParticipants, setNumParticipants] = useState(0);
 
     const [snackbarState, setSnackbarState] = useState({
@@ -91,20 +93,6 @@ const Landing = () => {
         setSelectedClassItem(null);
         setConfirmDialogOpen(false);
         resetFormData()
-    };
-
-    const fetchClasses = async () => {
-        try {
-            const response = await fetch(`${API_BASE}/classes`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const classData = await response.json();
-
-            setClasses(classData);
-        } catch (error) {
-            setError(`Error fetching classes: ${error.message}`);
-        }
     };
 
     const fetchUserCount = async (classItem, date) => {
@@ -279,21 +267,15 @@ const Landing = () => {
         return days <= classItem.daysPriorCanSignUp
     }
 
-    useEffect(() => {
-        fetchClasses().then(() => {
-            setLoading(false);
-        });
-    }, []);
-
     return (
         <Container sx={{ marginTop: 4 }}>
             <Typography variant="h1" gutterBottom>{general.Title}</Typography>
-            {error && <Typography color="error">Error fetching classes: {error}</Typography>}
+            {error && <Typography color="error">Error fetching classes: {error.error}</Typography>}
             {loading && <CircularProgress />}
-            {!loading && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
+            {!loading && classes && classes.length === 0 && <Typography variant="h6" gutterBottom>No classes available</Typography>}
             <Container>
                 <Grid container spacing={1}>
-                    {classes.map((classItem) => (
+                    {classes && classes.map((classItem) => (
                         <Grid item xs={12} sm={6} md={4} key={classItem._id}>
                             <ClassCard 
                                 open={classItem === selectedClassItem && open}
