@@ -7,7 +7,7 @@ export const classesApi = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: API_BASE }),
     endpoints: (builder) => ({
         getClasses: builder.query({
-            query: (onlyOngiong) => `/classes${onlyOngiong ? '' : '?all'}`,
+            query: (onlyOngoing) => `/classes${onlyOngoing ? '' : '?all'}`,
         })
     }),
 })
