@@ -410,7 +410,6 @@ router.post('/classes', upload.single('image'), async (req, res) => {
 
 router.put('/classes/:id', upload.single('image'), async (req, res) => {
   try {
-    console.log(req.body)
     if (!auth.authenticate(req.body.key)) {
       return res.status(401).json("forbidden");
     }
@@ -433,7 +432,6 @@ router.put('/classes/:id', upload.single('image'), async (req, res) => {
       opts.image = req.file.buffer 
       opts.imageType = req.file.mimetype
     }
-    console.log(opts)
 
     const { num, error } = validateClass(opts)
     if (error) {
