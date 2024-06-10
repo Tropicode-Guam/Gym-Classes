@@ -290,6 +290,26 @@ const withinDaysBeforeClass = (classItem, date) => {
   return days <= classItem.daysPriorCanSignUp
 }
 
+function validateClass(opts) {
+  if (!isThisAClassDay(new Date(opts.startDate), opts)) {
+    return { num: 400, error: 'Start date isn\'t a class date' };
+  }
+
+  if (opts.endDate && !isThisAClassDay(new Date(opts.endDate), opts)) {
+    return { num: 400, error: 'End date isn\'t a class date' };
+  }
+
+  if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
+    return { num: 400, error: 'Start date must be before end date' };
+  }
+
+  if (new Date(opts.startDate) >= new Date(opts.endTime)) {
+    return { num: 400, error: 'Start date must be before end time' };
+  }
+
+  return { num: 200, error: null };
+}
+
 router.post('/signup', async (req, res) => {
   try {
     const { name, phone, gymMembership, insurance, insuranceMemberId, selectedDate, selectedClass } = req.body;
@@ -363,20 +383,9 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       frequency: req.body.frequency,
     }
 
-    if (!isThisAClassDay(new Date(opts.startDate), opts)) {
-      return res.status(400).json({ error: 'Start date isn\'t a class date' });
-    }
-
-    if (opts.endDate && !isThisAClassDay(new Date(opts.endDate), opts)) {
-      return res.status(400).json({ error: 'End date isn\'t a class date' });
-    }
-
-    if (opts.endDate && new Date(opts.startDate) > new Date(opts.endDate)) {
-      return res.status(400).json({ error: 'Start date must be before end date' });
-    }
-
-    if (new Date(opts.startDate) >= new Date(opts.endTime)) {
-      return res.status(400).json({ error: 'Start date must be before end time' });
+    const { num, error } = validateClass(opts)
+    if (error) {
+      return res.status(num).json({ error });
     }
 
     const newClass = new Class(opts);
@@ -395,6 +404,47 @@ router.post('/classes', upload.single('image'), async (req, res) => {
     res.status(201).json(savedClass);
   } catch (error) {
     console.error('Error creating class:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.put('/classes/:id', upload.single('image'), async (req, res) => {
+  try {
+    console.log(req.body)
+    if (!auth.authenticate(req.body.key)) {
+      return res.status(401).json("forbidden");
+    }
+    const opts = {
+      title: req.body.title,
+      description: req.body.description,
+      sponsor: req.body.sponsor || null,
+      trainer: req.body.trainer || null,
+      startDate: req.body.startDate,
+      endTime: req.body.endTime,
+      endDate: req.body.endDate,
+      size: req.body.size,
+      fee: req.body.fee,
+      daysPriorCanSignUp: req.body.daysPriorCanSignUp,
+      days: JSON.parse(req.body.days),
+      color: req.body.color,
+      frequency: req.body.frequency,
+    }
+    if (req.file) { 
+      opts.image = req.file.buffer 
+      opts.imageType = req.file.mimetype
+    }
+    console.log(opts)
+
+    const { num, error } = validateClass(opts)
+    if (error) {
+      return res.status(num).json({ error });
+    }
+    
+    const updatedClass = await Class.findByIdAndUpdate(req.params.id, opts, { new: true });
+    res.status(200).json(updatedClass);
+    
+  } catch (error) {
+    console.error('Error updating class:', error);
     res.status(500).send(error.message);
   }
 });
