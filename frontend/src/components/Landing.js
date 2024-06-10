@@ -399,7 +399,7 @@ const Landing = () => {
                                             <input type="hidden" name="selectedClass" value={formData.selectedClass} />
                                         </Grid>
                                         <Grid container item xs={12} order={3} justifyContent="center">
-                                            <Button type="submit" variant="contained" color="primary" disabled={classFull || formData.selectedDate === ''}>Submit</Button>
+                                            <Button type="submit" variant="contained" color="primary" disabled={classFull}>Submit</Button>
                                         </Grid>
                                     </Grid>
                                 </form>
