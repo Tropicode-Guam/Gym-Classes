@@ -187,6 +187,8 @@ function Admin() {
         setFrequency('none');
         setDaysPriorCanSignUp(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
         setColor(chooseRandomColor());
+
+        setEditingClassItem(null);
     }
 
     const handleDayChange = (day) => {
