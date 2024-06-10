@@ -8,8 +8,15 @@ export const classesApi = createApi({
     endpoints: (builder) => ({
         getClasses: builder.query({
             query: (onlyOngoing) => `/classes${onlyOngoing ? '' : '?all'}`,
-        })
+        }),
+        updateClassOrder: builder.mutation({
+            query: (data) => ({
+                url: '/classorder',
+                method: 'PUT',
+                body: data
+            }),
+        }),
     }),
 })
 
-export const { useGetClassesQuery } = classesApi
+export const { useGetClassesQuery, useUpdateClassOrderMutation } = classesApi
