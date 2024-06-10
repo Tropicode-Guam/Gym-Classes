@@ -646,10 +646,7 @@ function Admin() {
                                     { editingClassItem ? 
                                     <Button 
                                         variant="contained" 
-                                        onClick={() => {
-                                            setEditingClassItem(null); 
-                                            resetClassForm()
-                                        }}
+                                        onClick={resetClassForm}
                                         sx={{ mt: 3, mr: 1 }}
                                     >
                                         Cancel
