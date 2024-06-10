@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
+import { format } from 'date-fns';
 import ClassList from './ClassList';
 import { ClassCard } from './ClassCard';
 import { OnlyOngoingContext } from '../Contexts';
@@ -51,6 +52,7 @@ const isJPEG = check([0xff, 0xd8, 0xff]);
 const SUPPORTED_FILE_TYPES = { 'image/png': isPNG, 'image/jpeg': isJPEG };
 
 function Admin() {
+    const form = useRef(null);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loggedIn, setLoggedIn] = useState(false);
@@ -101,7 +103,7 @@ function Admin() {
         return `${Math.floor(Math.random() * COLOR_PALETTE.length)}`;
     }
 
-    const [days, setDays] = useState({
+    const EMPTY_DAYS = {
         Sunday: false,
         Monday: false,
         Tuesday: false,
@@ -109,7 +111,9 @@ function Admin() {
         Thursday: false,
         Friday: false,
         Saturday: false,
-    });
+    }
+
+    const [days, setDays] = useState({...EMPTY_DAYS});
     const DEFAULT_DAYS_PRIOR_CAN_SIGN_UP = 2
     const [frequency, setFrequency] = useState('none');
     const [daysPriorCanSignUp, setDaysPriorCanSignUp] = useState(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
@@ -119,6 +123,7 @@ function Admin() {
     const [errorOpen, setErrorOpen] = useState(false);
 
     const[showRequiredFields, setShowRequiredFields] = useState(false);
+    const [editingClassItem, setEditingClassItem] = useState(null);
 
     const dayOfWeek = getDOWFromDateString(startDate)
 
@@ -138,6 +143,15 @@ function Admin() {
             .map(([day]) => dayMapping[day]);
     };
 
+    const getDaysAsMap = (dayList) => {
+        const dayMap = {...EMPTY_DAYS}
+        const dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        dayList.forEach((day) => {
+            dayMap[dayOrder[day]] = true
+        })
+        return dayMap
+    };
+
     const previewClassItem = {
         title: title,
         description: description,
@@ -153,6 +167,25 @@ function Admin() {
         size: size,
         color: color,
         _id: "PREVIEW"
+    }
+
+    const resetClassForm = () => {
+        setTitle('');
+        setDescription('');
+        setSponsor('None');
+        setTrainer('');
+        setStartDate('');
+        setEndTime('');
+        setEndDate('');
+        setSize('');
+        setFee(0);
+        setImage(null);
+        setImageType(null);
+        setImagePreviewUrl(null); // Reset image preview URL
+        setDays({...EMPTY_DAYS});
+        setFrequency('none');
+        setDaysPriorCanSignUp(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
+        setColor(chooseRandomColor());
     }
 
     const handleDayChange = (day) => {
@@ -227,36 +260,21 @@ function Admin() {
         formData.append('key', authKey); // Include the key in the request body
 
         try {
-            const response = await fetch(`${API_BASE}/classes`, {
-                method: 'POST',
-                body: formData
-            });
+            let response;
+            if (editingClassItem) {
+                response = await fetch(`${API_BASE}/classes/${editingClassItem._id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+            } else {
+                response = await fetch(`${API_BASE}/classes`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
 
             if (response.ok) {
-                setTitle('');
-                setDescription('');
-                setSponsor('None');
-                setTrainer('');
-                setStartDate('');
-                setEndTime('');
-                setEndDate('');
-                setSize('');
-                setFee(0);
-                setImage(null);
-                setImageType(null);
-                setImagePreviewUrl(null); // Reset image preview URL
-                setDays({
-                    Sunday: false,
-                    Monday: false,
-                    Tuesday: false,
-                    Wednesday: false,
-                    Thursday: false,
-                    Friday: false,
-                    Saturday: false,
-                });
-                setFrequency('none');
-                setDaysPriorCanSignUp(DEFAULT_DAYS_PRIOR_CAN_SIGN_UP);
-                setColor(chooseRandomColor());
+                resetClassForm();
                 // Success notification or update state to show successful upload
             } else if (response.status === 401) {
                 console.log('Login key not authorized', response.status);
@@ -327,7 +345,33 @@ function Admin() {
         }
     };
 
+    const handleClassSelect = (classItem) => {
+        setEditingClassItem(classItem);
+
+        setTitle(classItem.title);
+        setDescription(classItem.description);
+        setSponsor(classItem.sponsor);
+        setTrainer(classItem.trainer);
+        setStartDate(format(new Date(classItem.startDate), "yyyy-MM-dd'T'HH:mm"));
+        setEndDate(classItem.endDate && format(new Date(classItem.endDate), "yyyy-MM-dd'T'HH:mm"));
+        setEndTime(format(new Date(classItem.endTime), 'HH:mm'));
+        setSize(classItem.size);
+        setFee(classItem.fee);
+        setFrequency(classItem.frequency);
+        setDaysPriorCanSignUp(classItem.daysPriorCanSignUp);
+        setColor(classItem.color);
+        setDays(getDaysAsMap(classItem.days));
+        setImageType(classItem.imageType);
+        setImagePreviewUrl(`${API_BASE}/images/${classItem._id}`)
+        setImage('EDITING');
+
+        form.current.scrollIntoView()
+    }
+
     useEffect(() => {
+        if (image === 'EDITING') {
+            return;
+        }
         if (!image) {
             setImagePreviewUrl(null);
             return;
@@ -347,11 +391,11 @@ function Admin() {
     }, [])
 
     return (
-        <Container className="admin-page" sx={{ marginTop: 4 }}>
+        <Container className="admin-page" sx={{ marginTop: 4 }} ref={form}>
             {loggedIn ? (
                 <>
                     <Typography component="h1" variant="h4">
-                        Create a Class
+                        {editingClassItem ? 'Edit' : 'Create'} a Class
                     </Typography>
                     <Container>
                         <Grid
@@ -584,8 +628,20 @@ function Admin() {
                                             )}
                                         </Box>
                                     </Box>
+                                    { editingClassItem ? 
+                                    <Button 
+                                        variant="contained" 
+                                        onClick={() => {
+                                            setEditingClassItem(null); 
+                                            resetClassForm()
+                                        }}
+                                        sx={{ mt: 3, mr: 1 }}
+                                    >
+                                        Cancel
+                                    </Button> 
+                                    : null }
                                     <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-                                        {loading ? <CircularProgress size={24} /> : 'Add Class'}
+                                        {loading ? <CircularProgress size={24} /> : (editingClassItem ? 'Save Class' : 'Add Class')}
                                     </Button>
                                     <Snackbar
                                         open={errorOpen}
@@ -615,7 +671,11 @@ function Admin() {
                         </Grid>
                     </Container>
                     <Container>
-                        <ClassList/>
+                        <ClassList 
+                            onClassSelect={handleClassSelect} 
+                            closeOnSelect={true} 
+                            authKey={authKey}
+                        />
                     </Container>
                     <Button
                         variant="contained"

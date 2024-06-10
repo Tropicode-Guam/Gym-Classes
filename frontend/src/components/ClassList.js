@@ -7,6 +7,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import EditIcon from '@mui/icons-material/Edit';
 import { format, parseISO } from 'date-fns';
 import { ClassCard } from './ClassCard';
 import { OnlyOngoingContext } from '../Contexts';
@@ -16,7 +17,8 @@ import { useUpdateClassOrderMutation } from '../slices/classesSlice';
 
 const API_BASE = process.env.REACT_APP_API;
 
-function ClassList() {
+function ClassList(props) {
+    const { onClassSelect, closeOnSelect, authKey } = props;
     const onlyOngoing = useContext(OnlyOngoingContext);
     const { data: classes, isLoading: loading, error, refetch: refetchClasses } = useGetClassesQuery(onlyOngoing);
     const {refetch: otherRefetch} = useGetClassesQuery(!onlyOngoing);
@@ -28,6 +30,7 @@ function ClassList() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [classDates, setClassDates] = useState([]);
     const [selectedClassDate, setSelectedClassDate] = useState('');
+    const [cardOpen, setCardOpen] = useState(false);
 
     const handleViewUsers = async (classId) => {
         const selectedClassItem = classes.find((classItem) => classItem._id === classId);
@@ -103,6 +106,23 @@ function ClassList() {
         setShowDeleteModal(true);
     };
 
+    const moveCard = async (index, direction) => {
+        const newIndex = index + direction;
+        if (newIndex >= 0 && newIndex < classes.length) {
+            const newClasses = [...classes];
+            const temp = newClasses[index];
+            newClasses[index] = newClasses[newIndex];
+            newClasses[newIndex] = temp;
+            const payload = {
+                ids: newClasses.map((classItem) => classItem._id),
+                key: authKey
+            }
+            await updateClassOrder(payload);
+            await refetchClasses();
+            await otherRefetch();
+        }
+    };
+
     return (
         <div>
             <Typography variant="h4" gutterBottom sx={{ marginTop: 4 }}>Class List</Typography>
@@ -117,13 +137,27 @@ function ClassList() {
                         <Grid container spacing={4}>
                             {classes.map((classItem, i) => (
                                 <Grid item xs={12} sm={6} md={4} key={classItem._id}>
-                                    <ClassCard classItem={classItem} maxModalWidth='1000px'>
+                                    <ClassCard 
+                                        classItem={classItem}
+                                        open={cardOpen && selectedClass === classItem}
+                                        onOpen={() => {setCardOpen(true); setSelectedClass(classItem)}}
+                                        onClose={() => {setCardOpen(false); setSelectedClass(null)}}
+                                        maxModalWidth='1000px'
+                                    >
                                         <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
                                         <IconButton disabled={i==0} color="primary" onClick={() => moveCard(i, -1)}>
                                             <ArrowBackIosNewIcon />
                                         </IconButton>
                                         <IconButton disabled={i==classes.length-1} color="primary" onClick={() => moveCard(i, 1)}>
                                             <ArrowForwardIosIcon />
+                                        </IconButton>
+                                        <IconButton color="primary" onClick={() => {
+                                            onClassSelect(classItem)
+                                            if (closeOnSelect) {
+                                                setCardOpen(false);
+                                            }
+                                        }}>
+                                            <EditIcon/>
                                         </IconButton>
                                         <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
                                             <DeleteIcon />
