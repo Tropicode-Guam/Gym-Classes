@@ -35,6 +35,10 @@ const classSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    imageVersion: {
+        type: Number,
+        default: 0
+    },
     days: {
         type: [Number],
         required: false

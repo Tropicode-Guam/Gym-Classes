@@ -124,6 +124,7 @@ function Admin() {
 
     const[showRequiredFields, setShowRequiredFields] = useState(false);
     const [editingClassItem, setEditingClassItem] = useState(null);
+    const imageVersion = editingClassItem ? editingClassItem.imageVersion + 1 : 0;
 
     const dayOfWeek = getDOWFromDateString(startDate)
 
@@ -251,6 +252,7 @@ function Admin() {
         formData.append('endDate', endDate && new Date(endDate).toISOString());
         formData.append('size', size);
         formData.append('image', image);
+        formData.append('imageVersion', imageVersion);
         formData.append('fee', fee);
         formData.append('imageType', imageType);
         formData.append('days', JSON.stringify(daysAsNumbers));

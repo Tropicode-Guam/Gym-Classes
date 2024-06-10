@@ -86,7 +86,7 @@ export function ClassCard(props) {
                     <CardMedia
                         component="img"
                         height="250"
-                        image={classItem.imageUrl || `${API_BASE}/images/${classItem._id}`}
+                        image={classItem.imageUrl || `${API_BASE}/images/${classItem._id}?v=${classItem.imageVersion}`}
                         alt={classItem.title}
                         onError={({ currentTarget }) => {
                             currentTarget.onerror = null;
