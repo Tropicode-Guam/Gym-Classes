@@ -3,7 +3,7 @@ import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
     CircularProgress, Snackbar, Alert, ButtonBase, Grid,
-    InputAdornment
+    InputAdornment, Link
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
@@ -427,6 +427,17 @@ function Admin() {
                                         margin="normal"
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
+                                        helperText={
+                                            <>
+                                                You can use {
+                                                    <Link 
+                                                        href="https://ghost.org/changelog/markdown/"
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                    >Markdown</Link>
+                                                } here!
+                                            </>
+                                        }
                                     />
                                     <TextField
                                         select

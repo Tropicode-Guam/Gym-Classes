@@ -7,6 +7,7 @@ import { SUB_THEMES } from "../theme";
 import CloseIcon from '@mui/icons-material/Close';
 import { DialogActions } from '@mui/material';
 import { styled } from '@mui/system';
+import { MuiMarkdown } from 'mui-markdown';
 
 const API_BASE = process.env.REACT_APP_API;
 
@@ -108,8 +109,10 @@ export function ClassCard(props) {
                                 WebkitLineClamp: "2",
                                 WebkitBoxOrient: "vertical",
                             }}
-                        >
-                            {classItem.description || 'DESCRIPTION'}
+                        >   
+                            <MuiMarkdown>
+                                {classItem.description || 'DESCRIPTION'}
+                            </MuiMarkdown>
                         </Typography>
                     </CardContent>
                 </Card>
@@ -169,7 +172,11 @@ export function ClassCard(props) {
                     {/* </Box> */}
                     {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     {classItem.trainer && <Typography variant="body1">Hosted by {classItem.trainer}</Typography>}
-                    <DialogContentText>{classItem.description}</DialogContentText>
+                    <DialogContentText>
+                        <MuiMarkdown>
+                            {classItem.description}
+                        </MuiMarkdown>
+                    </DialogContentText>
                     <DialogActions sx={{ paddingLeft: 0, paddingRight: 0, paddingTop: 4}}>
                         { children }
                     </DialogActions>
