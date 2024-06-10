@@ -353,7 +353,7 @@ function Admin() {
         setSponsor(classItem.sponsor);
         setTrainer(classItem.trainer);
         setStartDate(format(new Date(classItem.startDate), "yyyy-MM-dd'T'HH:mm"));
-        setEndDate(classItem.endDate && format(new Date(classItem.endDate), "yyyy-MM-dd'T'HH:mm"));
+        setEndDate(classItem.endDate ? format(new Date(classItem.endDate), "yyyy-MM-dd'T'HH:mm") : '');
         setEndTime(format(new Date(classItem.endTime), 'HH:mm'));
         setSize(classItem.size);
         setFee(classItem.fee);
