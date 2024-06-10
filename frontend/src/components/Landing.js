@@ -197,14 +197,12 @@ const Landing = () => {
         if (event.target.name === "phone") {
             val = scrubPhoneNumber(val)
         }
+        const newFormData = { ...formData }
         if (event.target.name === "insurance" && val === 'Other/None') {
-            setFormData({
-                ...formData,
-                insuranceMemberId: ''
-            })
+            newFormData.insuranceMemberId = ''
         }
         setFormData({
-            ...formData,
+            ...newFormData,
             [event.target.name]: val || ''
         });
     };
