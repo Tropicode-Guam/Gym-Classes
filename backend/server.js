@@ -377,6 +377,7 @@ router.post('/classes', upload.single('image'), async (req, res) => {
       fee: req.body.fee,
       image: req.file ? req.file.buffer : undefined,
       imageType: req.file ? req.file.mimetype : undefined,
+      imageVersion: req.file ? req.imageVersion : undefined,
       daysPriorCanSignUp: req.body.daysPriorCanSignUp,
       days: JSON.parse(req.body.days),
       color: req.body.color,
@@ -431,6 +432,7 @@ router.put('/classes/:id', upload.single('image'), async (req, res) => {
     if (req.file) { 
       opts.image = req.file.buffer 
       opts.imageType = req.file.mimetype
+      opts.imageVersion = req.body.imageVersion
     }
 
     const { num, error } = validateClass(opts)
