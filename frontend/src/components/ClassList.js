@@ -5,16 +5,22 @@ import {
     IconButton, Paper, CircularProgress, MenuItem, Select, Grid
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { format, parseISO } from 'date-fns';
 import { ClassCard } from './ClassCard';
 import { OnlyOngoingContext } from '../Contexts';
 import { useGetClassesQuery } from '../slices/classesSlice';
+import { useUpdateClassOrderMutation } from '../slices/classesSlice';
+
 
 const API_BASE = process.env.REACT_APP_API;
 
 function ClassList() {
     const onlyOngoing = useContext(OnlyOngoingContext);
     const { data: classes, isLoading: loading, error, refetch: refetchClasses } = useGetClassesQuery(onlyOngoing);
+    const {refetch: otherRefetch} = useGetClassesQuery(!onlyOngoing);
+    const [updateClassOrder] = useUpdateClassOrderMutation();
 
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState([]);
@@ -109,10 +115,16 @@ function ClassList() {
                 <>
                     {classes && classes.length > 0 ? (
                         <Grid container spacing={4}>
-                            {classes.map((classItem) => (
+                            {classes.map((classItem, i) => (
                                 <Grid item xs={12} sm={6} md={4} key={classItem._id}>
                                     <ClassCard classItem={classItem} maxModalWidth='1000px'>
                                         <Button variant="contained" onClick={() => handleViewUsers(classItem._id)}>View Users</Button>
+                                        <IconButton disabled={i==0} color="primary" onClick={() => moveCard(i, -1)}>
+                                            <ArrowBackIosNewIcon />
+                                        </IconButton>
+                                        <IconButton disabled={i==classes.length-1} color="primary" onClick={() => moveCard(i, 1)}>
+                                            <ArrowForwardIosIcon />
+                                        </IconButton>
                                         <IconButton color="primary" onClick={() => handleClickDeleteClass(classItem._id)} aria-label="delete">
                                             <DeleteIcon />
                                         </IconButton>

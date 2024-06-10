@@ -14,6 +14,7 @@ const API_BASE = process.env['API_BASE'];
 const Class = require('./models/Class');
 const User = require('./models/User');
 const SignUp = require('./models/SignUp');
+const ClassOrder = require('./models/ClassOrder');
 
 // Load environment variables
 require('dotenv').config();
@@ -85,6 +86,59 @@ router.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+router.get('/classorder', async (req, res) => {
+  try {
+    let classOrder = await ClassOrder.findOne();
+    if (!classOrder) {
+      classOrder = {ids: (await Class.find({}).select('_id').sort({createdAt:-1})).map((item) => item._id)};
+      await ClassOrder.create(classOrder);
+    }
+    res.json(classOrder.ids);
+  } catch (error) {
+    console.error('Error fetching class order:', error);
+    res.status(500).send(error.message);
+  }
+})
+
+router.put('/classorder', async (req, res) => {
+  try {
+    if (!auth.authenticate(req.body.key)) {
+      return res.status(401).json("forbidden");
+    }
+    const classOrder = req.body.ids;
+    const orderMap = {}
+    classOrder.forEach((id) => {
+      orderMap[id] = true
+    })
+    const allClasses = await getOrderedClasses({});
+    const newOrder = []
+    let i = 0
+    allClasses.forEach((classItem) => {
+      if (orderMap[classItem._id]) {
+        newOrder.push(classOrder[i])
+        i++
+      } else {
+        newOrder.push(classItem._id)
+      }
+    })
+    const result = await ClassOrder.findOneAndUpdate({}, {ids: newOrder}, {new: true});
+    res.json(result.ids);
+  } catch (error) {
+    console.error('Error creating class order:', error);
+    res.status(500).send(error.message);
+  }
+})
+
+const getOrderedClasses = async (query) => {
+  const classes = await Class.find(query).select('-image');
+  const classOrder = (await ClassOrder.findOne()) || {ids: []};
+  const classMap = {};
+  for (const classItem of classes) {
+    classMap[classItem._id] = classItem;
+  }
+  return classOrder.ids.filter(id => classMap[id]).map(id => classMap[id]);
+}
+
 // Define the GET endpoint for fetching classes
 router.get('/classes', async (req, res) => {
   try {
@@ -99,8 +153,8 @@ router.get('/classes', async (req, res) => {
     if (req.query.all != null) {
       query = {}
     }
-    const classes = await Class.find(query).select('-image').sort({createdAt:-1});
-    res.json(classes);
+
+    res.json(await getOrderedClasses(query));
   } catch (error) {
     console.error('Error fetching classes:', error);
     res.status(500).send(error.message);
@@ -166,6 +220,13 @@ router.delete('/classes/:classId', async (req, res) => {
 
     if (!classObj) {
       return res.status(404).json({ error: 'Class not found' });
+    }
+
+    // remove class from classorder
+    const order = await ClassOrder.findOne();
+    if (order && order.ids.includes(classId)) {
+      order.ids.splice(order.ids.indexOf(classId), 1);
+      await ClassOrder.findOneAndUpdate({}, order);
     }
 
     await Class.findByIdAndDelete(classId);
@@ -321,6 +382,16 @@ router.post('/classes', upload.single('image'), async (req, res) => {
     const newClass = new Class(opts);
 
     const savedClass = await newClass.save();
+
+    // place new class at beginning of class order
+    const order = await ClassOrder.findOne();
+    if (order) {
+      order.ids.unshift(savedClass._id);
+      await order.save();
+    } else {
+      await ClassOrder.create({ids: [savedClass._id]});
+    }
+
     res.status(201).json(savedClass);
   } catch (error) {
     console.error('Error creating class:', error);
