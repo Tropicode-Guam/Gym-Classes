@@ -92,7 +92,7 @@ export function ClassCard(props) {
                         onError={({ currentTarget }) => {
                             currentTarget.onerror = null;
                         }}
-                        style={{ objectFit: 'cover' }}
+                        style={{ objectFit: 'cover', pointerEvents: 'none' }}
                     />
                     <CardContent>
                         <Typography variant="h5" component="div">
@@ -142,7 +142,7 @@ export function ClassCard(props) {
                     onError={({ currentTarget }) => {
                         currentTarget.onerror = null;
                     }}
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: 'cover', pointerEvents: 'none' }}
                 />
                 <IconButton
                     aria-label="close"
