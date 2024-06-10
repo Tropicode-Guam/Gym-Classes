@@ -42,9 +42,9 @@ export function ClassCard(props) {
                 days[i] = classItem.days.includes(i)
             })
             freqDisp = (
-                <Typography display="inline">
-                    ({daysOrder.map(i => {
-                        return (<Typography display="inline"
+                <Typography display="inline" component={"span"}>
+                    ({daysOrder.map((i, ii) => {
+                        return (<Typography display="inline" key={ii}
                             sx={{
                                 color: days[i] ? 'inherit' : theme.palette.grey[500],
                                 fontWeight: days[i] ? 'bold' : 'normal'
@@ -69,7 +69,7 @@ export function ClassCard(props) {
 
     useEffect(() => {
         if (open !== isOpen) {
-            setIsOpen(open);
+            setIsOpen(Boolean(open));
         }
     }, [open]);
 
@@ -96,7 +96,7 @@ export function ClassCard(props) {
                     />
                     <CardContent>
                         <Typography variant="h5" component="div">
-                            {classItem.title || 'TITLE'} | <Typography variant="body1" display={"inline"}>
+                            {classItem.title || 'TITLE'} | <Typography variant="body1" display={"inline"} component={"span"}>
                                 {freqDisp}
                             </Typography>
                         </Typography>
@@ -109,6 +109,7 @@ export function ClassCard(props) {
                                 WebkitLineClamp: "2",
                                 WebkitBoxOrient: "vertical",
                             }}
+                            component={"span"}
                         >   
                             <MuiMarkdown>
                                 {classItem.description || 'DESCRIPTION'}
@@ -164,7 +165,7 @@ export function ClassCard(props) {
                         justifyContent: 'space-between'
                     }}> */}
                         <Typography variant="h5" display="inline">{classItem.title} | </Typography>
-                        <Typography variant="body1" display="inline">{freqDisp} from {
+                        <Typography variant="body1" display="inline" component={"span"}>{freqDisp} from {
                             classItem.startDate ? format(parseISO(classItem.startDate), 'h:mmaaa') : "0:00am"
                         } - {
                             classItem.endTime   ? format(parseISO(classItem.endTime),   'h:mmaaa') : "0:00am"
@@ -172,7 +173,7 @@ export function ClassCard(props) {
                     {/* </Box> */}
                     {classItem.sponsor && <Typography variant="body1">Sponsored By {classItem.sponsor}</Typography>}
                     {classItem.trainer && <Typography variant="body1">Hosted by {classItem.trainer}</Typography>}
-                    <DialogContentText>
+                    <DialogContentText component={"span"}>
                         <MuiMarkdown>
                             {classItem.description}
                         </MuiMarkdown>

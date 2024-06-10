@@ -382,7 +382,7 @@ const Landing = () => {
                                                 ))}
                                                 <MenuItem value="Other/None">Other/None</MenuItem>
                                             </TextField>
-                                            <Collapse in={formData.insurance && formData.insurance !== "Other/None"}>
+                                            <Collapse in={Boolean(formData.insurance) && formData.insurance !== "Other/None"}>
                                                 <TextField
                                                     disabled={classFull}
                                                     label={INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].id_name}
@@ -390,7 +390,7 @@ const Landing = () => {
                                                     name="insuranceMemberId"
                                                     value={formData.insuranceMemberId}
                                                     onChange={handleInputChange}
-                                                    required={formData.insurance && formData.insurance !== "Other/None"}
+                                                    required={Boolean(formData.insurance) && formData.insurance !== "Other/None"}
                                                     fullWidth
                                                     margin="normal"
                                                 />

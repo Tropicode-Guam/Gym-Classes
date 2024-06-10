@@ -443,7 +443,6 @@ function Admin() {
                                     />
                                     <TextField
                                         select
-                                        displayEmpty
                                         label="Sponsor"
                                         id="sponsor"
                                         name="sponsor"
