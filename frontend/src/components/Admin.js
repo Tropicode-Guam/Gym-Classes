@@ -3,7 +3,7 @@ import {
     Button, TextField, Checkbox, FormControlLabel, Select, MenuItem,
     FormGroup, FormControl, InputLabel, Typography, Container, Box,
     CircularProgress, Snackbar, Alert, ButtonBase, Grid,
-    InputAdornment, Link
+    InputAdornment, Link, useMediaQuery
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
@@ -90,6 +90,7 @@ function Admin() {
 
     const [color, setColor] = useState('');
     const theme = useTheme();
+    const smUp = useMediaQuery(theme.breakpoints.up('sm'));
 
     const COLOR_PALETTE = []
     Object.entries(theme.palette).forEach(([key, value]) => {
@@ -672,7 +673,7 @@ function Admin() {
                                 </Box>
                             </Grid>
                             <Grid item xs={12} sm={6} md={4}
-                                sx={{ position: 'sticky', top: '50%', transform: 'translateY(-50%)' }}
+                                sx={smUp ? { position: 'sticky', top: '50%', transform: 'translateY(-50%)' } : {}}
                             >
                                 <Box>
                                     <ClassCard classItem={previewClassItem} key={imagePreviewUrl}>
