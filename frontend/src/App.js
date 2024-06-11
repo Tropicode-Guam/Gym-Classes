@@ -3,13 +3,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Landing from './components/Landing';
 import Admin from './components/Admin';
-import { AppBar, Toolbar, Checkbox, Box, Tooltip } from '@mui/material';
+import { AppBar, Toolbar, Checkbox, Box, Tooltip, FormControlLabel, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { OnlyOngoingContext } from './Contexts';
 
 const PUBLIC_URL = process.env.PUBLIC_URL || '';
 
 export function App() {
   const [onlyOngoing, setOnlyOngoing] = useState(true);
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.only('sm'));
 
   return (
     <Router basename={PUBLIC_URL}>
@@ -26,18 +29,28 @@ export function App() {
               }}
             ></img>
             <Box sx={{flexGrow: 1}}></Box>
-            <Tooltip title="Only show ongoing classes">
-              <Checkbox
-                checked={onlyOngoing}
-                onChange={(e) => {setOnlyOngoing(e.target.checked)}}
+            <Tooltip 
+              title="Only show ongoing classes"
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={onlyOngoing}
+                    onChange={(e) => {setOnlyOngoing(e.target.checked)}}
+                    sx={{
+                      color: 'white',
+                      '&.Mui-checked': {
+                        color: 'white',
+                      }
+                    }}>
+                      {/* TODO: Add label on mobile? */}
+                  </Checkbox>
+                }
+                label={matches && "Only ongoing classes"}
                 sx={{
-                  color: 'white',
-                  '&.Mui-checked': {
-                    color: 'white',
-                  }
-                }}>
-                  {/* TODO: Add label on mobile? */}
-              </Checkbox>
+                  display: { xs: 'none', sm: 'inline' }
+                }}
+              />
             </Tooltip>
           </Toolbar>
         </AppBar>
