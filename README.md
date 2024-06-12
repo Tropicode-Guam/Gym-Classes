@@ -150,7 +150,7 @@ Finally, `also_free_for` can also be the special value `all`. A class doesn't ne
 
 You can access the logs by using the command `docker compose logs` (check out the [docs](https://docs.docker.com/reference/cli/docker/compose/logs/) for more detailed options)
 
-If you suspect a problem with a certain portion of the app, you can use `docker compose` followed by one of the short service names below:
+If you suspect a problem with a certain portion of the app, you can use `docker compose logs` followed by one of the short service names below:
 
 ```
 frontend
