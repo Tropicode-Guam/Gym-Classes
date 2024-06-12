@@ -125,12 +125,13 @@ const Landing = () => {
             return
         }
 
-        const freeFor = INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].also_free_for
+        const freeForAll = INSURANCE_MAP[formData.insurance] && INSURANCE_MAP[formData.insurance].also_free_for === "all"
+        const freeFor = SPONSORS_MAP[selectedClassItem.sponsor] && SPONSORS_MAP[selectedClassItem.sponsor].also_free_for
 
         if (!Number(selectedClassItem.fee) ||
             selectedClassItem.sponsor === formData.insurance ||
             hasGymMembership ||
-            freeFor === "all" ||
+            freeForAll ||
             freeFor === formData.insurance ||
             (Array.isArray(freeFor) && freeFor.includes(formData.insurance))
         ) {
