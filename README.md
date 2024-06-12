@@ -5,23 +5,23 @@ input new classes with a picture + description, maximum signups, date for signup
 ## Prereqs
 
 1. **Setup a domain for your server**
-  * Purchase a domain.
-  * Ensure your server has a static IP
-  * Create an A record mapping the ip to the domain
+     * Purchase a domain.
+     * Ensure your server has a static IP
+     * Create an A record mapping the ip to the domain
 2. **Setup network and server**
-  * Ensure ports 80 and 443 are open to the internet
+     * Ensure ports 80 and 443 are open to the internet
 3. Install prereqs
-  * [Docker](https://www.docker.com/get-started/)  
-  * [Git](https://www.git-scm.com/)
+     * [Docker](https://www.docker.com/get-started/)  
+     * [Git](https://www.git-scm.com/)
 4. **Setup repository**
-  * Clone this repo 
-    * navigate to the desired project location in your server via your terminal
-    * run `git clone https://github.com/Tropicode-Guam/gymjim`
-  * Create settings files
-    * Create a `.env` file
-      * copy [.env.sample](.env.sample) and name it `.env`
-      * fill in all the environment variables
-    * in the `frontend/settings` folder, create `general.json` and `insurances.json` files matching their example formats: `general.sample.json` and `insurances.sample.json` (read more about settings [below](#settings--configs))
+     * Clone this repo 
+       * navigate to the desired project location in your server via your terminal
+       * run `git clone https://github.com/Tropicode-Guam/gymjim`
+     * Create settings files
+       * Create a `.env` file
+         * copy [.env.sample](.env.sample) and name it `.env`
+         * fill in all the environment variables
+       * in the `frontend/settings` folder, create `general.json` and `insurances.json` files matching their example formats: `general.sample.json` and `insurances.sample.json` (read more about settings [below](#settings--configs))
 
 ## Deployment
 
