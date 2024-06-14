@@ -64,7 +64,7 @@ graph TD
 
 ## Settings & Configs
 
-* ⚠️ Be careful with spacing in the `.env` file and be careful with commas and double quotes in the `general.json` and `insurances.json` files. Incorrect format may prevent them from being loaded.
+* ⚠️ Be careful with spacing in the `.env` file and be careful with commas and double quotes in the `general.json`, `insurances.json`, and `color_palette.json` files. Incorrect format may prevent them from being loaded.
 * ⚠️ You should setup the `.env` file before running this in production (deployment). Once you run it for the first time, it will setup the database according to those settings. changing settings in the `.env` file afterwards may require alterations to the database to get it working again.
 * ℹ Note in production (deployment) mode, you will need to rerun the startup command to see the effects of changes to `frontend/settings` files.
 
