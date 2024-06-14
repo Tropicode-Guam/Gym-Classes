@@ -74,6 +74,10 @@ graph TD
 * The `ADMIN_USER` and password will be the only credentials used by users when accessing your.domain.com/classes/admin.
 * `HOST` should be your domain excluding the https:// part. For example: your.domain.com
 
+### `color_palette.json` file
+
+This file adjusts the colors of the class cards. You can add as many colors as you'd like in the format of [hexidecimal colors](https://imagecolorpicker.com/). If you'd like to stick with the defaults, you can just copy paste the `color_palette.sample.json` file into this one.
+
 ### `general.json` file
 
 The `Fee Message` setting replaces all occurances of `{FEE}` with the fee for that particular class. For example if the setting was `Pay {FEE} dollars at the gate.`, then the message would be *Pay 5.00 dollars at the gate.* assuming the class has a fee of 5.00.
