@@ -26,7 +26,9 @@ const CustomDialogPaper = styled('div')(({ theme }) => ({
 export function ClassCard(props) {
     const { classItem, children, onOpen, onClose, maxModalWidth, open } = props;
     const theme = useTheme();
-    const cardTheme = theme.palette[classItem.color];
+    const NUM_PALETTES = Object.keys(theme.palette).map(key => key.match(/^\d+$/)).filter(a => a).length
+    const cardTheme = theme.palette[classItem.color % NUM_PALETTES];
+
     const [isOpen, setIsOpen] = useState(false);
 
     let freqDisp = "";
@@ -75,7 +77,7 @@ export function ClassCard(props) {
 
     return (
         <>
-            <ThemeProvider theme={SUB_THEMES[classItem.color]}>
+            <ThemeProvider theme={SUB_THEMES[classItem.color % NUM_PALETTES]}>
                 <Card
                     sx={{
                         color: cardTheme.contrastText,
